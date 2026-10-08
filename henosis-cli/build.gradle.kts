@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":henosis-core"))
     implementation(project(":henosis-parser-android"))
     implementation(project(":henosis-gen-flutter"))
+    implementation(project(":henosis-gen-react-native"))
     implementation(libs.clikt)
     testImplementation(libs.json.schema.validator)
     testImplementation(testFixtures(project(":henosis-core")))

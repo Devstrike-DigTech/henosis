@@ -101,27 +101,33 @@ class ConfigCommandsTest {
     }
 
     @Test
-    fun `generate writes the Flutter package and copies the aar`() {
-        val out = workDir.resolve("generate-flutter")
+    fun `generate writes both packages and copies the aar`() {
+        val out = workDir.resolve("generate-all")
         val result = heno().test(listOf("generate", "-c", fixtureConfig.toString(), "--out", out.toString()))
         result.statusCode shouldBe 0
         result.stdout shouldContain "Wrote Flutter plugin to"
-        result.stderr shouldContain "rn generator is not available yet"
+        result.stdout shouldContain "Wrote React Native package to"
         val plugin = out.resolve("flutter/sample_sdk")
         Files.isRegularFile(plugin.resolve("pubspec.yaml")) shouldBe true
         Files.isRegularFile(plugin.resolve("lib/src/greeter.dart")) shouldBe true
-        Files.isRegularFile(plugin.resolve("android/libs/maven/henosis/local/sample_sdk/0.1.0/sample_sdk-0.1.0.aar")) shouldBe true
         Files.size(plugin.resolve("android/libs/maven/henosis/local/sample_sdk/0.1.0/sample_sdk-0.1.0.aar")) shouldBe
+            Files.size(Golden.sampleAar)
+        val rn = out.resolve("react-native/sample-sdk")
+        Files.isRegularFile(rn.resolve("package.json")) shouldBe true
+        Files.isRegularFile(rn.resolve("src/NativeSampleSdkGreeter.ts")) shouldBe true
+        Files.isRegularFile(rn.resolve("example/android/gradle/wrapper/gradle-wrapper.jar")) shouldBe true
+        Files.isExecutable(rn.resolve("example/android/gradlew")) shouldBe true
+        Files.size(rn.resolve("android/libs/maven/henosis/local/sample_sdk/0.1.0/sample_sdk-0.1.0.aar")) shouldBe
             Files.size(Golden.sampleAar)
     }
 
     @Test
-    fun `generate --target rn alone has nothing to produce yet`() {
+    fun `generate --target selects one package`() {
         val out = workDir.resolve("generate-rn")
         val result = heno().test(listOf("generate", "-c", fixtureConfig.toString(), "--target", "rn", "--out", out.toString()))
-        result.statusCode shouldBe 1
-        result.stderr shouldContain "rn generator is not available yet"
-        result.stderr shouldContain "nothing was generated"
+        result.statusCode shouldBe 0
+        Files.exists(out.resolve("flutter")) shouldBe false
+        Files.isDirectory(out.resolve("react-native/sample-sdk")) shouldBe true
     }
 
     @Test

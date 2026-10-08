@@ -3,6 +3,7 @@ package com.devstrike.henosis.cli
 import com.devstrike.henosis.core.codegen.GeneratorContext
 import com.devstrike.henosis.core.ir.IrJson
 import com.devstrike.henosis.gen.flutter.FlutterGenerator
+import com.devstrike.henosis.gen.reactnative.ReactNativeGenerator
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.ProgramResult
@@ -42,7 +43,10 @@ class GenerateCommand : CliktCommand(name = "generate") {
         }
         val wanted =
             targets.ifEmpty {
-                listOfNotNull(ir.targets.flutter?.let { FlutterGenerator.TARGET }, ir.targets.reactNative?.let { "rn" })
+                listOfNotNull(
+                    ir.targets.flutter?.let { FlutterGenerator.TARGET },
+                    ir.targets.reactNative?.let { ReactNativeGenerator.TARGET },
+                )
             }
         val context =
             GeneratorContext(
@@ -60,15 +64,22 @@ class GenerateCommand : CliktCommand(name = "generate") {
                     generated++
                 }
 
-                else -> {
-                    echo("generate: the $target generator is not available yet (milestone M4)", err = true)
+                ReactNativeGenerator.TARGET -> {
+                    if (ir.targets.reactNative == null) fail("error    --target rn: the config has no targets.react_native section")
+                    val dir = ReactNativeGenerator.generate(ir, context).write(out)
+                    echo("Wrote React Native package to $dir")
+                    generated++
                 }
             }
         }
-        if (generated == 0 && !emitIr) fail("error    nothing was generated; add targets.flutter or pass --emit-ir")
+        if (generated == 0 &&
+            !emitIr
+        ) {
+            fail("error    nothing was generated; add targets.flutter or targets.react_native, or pass --emit-ir")
+        }
     }
 
     private companion object {
-        val KNOWN_TARGETS = setOf(FlutterGenerator.TARGET, "rn")
+        val KNOWN_TARGETS = setOf(FlutterGenerator.TARGET, ReactNativeGenerator.TARGET)
     }
 }

@@ -50,3 +50,43 @@ jobs:
           flutter pub get
           dart analyze --fatal-infos
           flutter build apk --debug
+
+  react-native:
+    name: Generated React Native package builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: "platforms;android-36 platforms;android-37 build-tools;36.0.0 build-tools;37.0.0 ndk;27.1.12297006"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Enable Corepack (Yarn 4)
+        run: corepack enable
+
+      - name: Build heno and the sample SDK
+        run: ./gradlew :henosis-cli:installDist
+
+      - name: Generate the React Native package
+        run: henosis-cli/build/install/heno/bin/heno generate -c fixtures/henosis.yaml --target rn --out henosis-out
+
+      - name: Install and type-check
+        working-directory: henosis-out/react-native/sample-sdk
+        run: |
+          yarn install
+          yarn typecheck
+
+      - name: Build the generated example app (debug)
+        working-directory: henosis-out/react-native/sample-sdk/example/android
+        run: ./gradlew assembleDebug --no-daemon -PreactNativeArchitectures=arm64-v8a

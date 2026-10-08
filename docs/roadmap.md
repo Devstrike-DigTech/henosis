@@ -31,6 +31,19 @@ Everything here is **out of scope for v0.1** and lives in this file, not in the 
 - The generated plugin talks to the engine through `MethodChannel`/`EventChannel` directly; the
   `plugin_platform_interface` pattern (needed for federated plugins) is not generated.
 
+## React Native notes (observed while building M4)
+
+- Codegen cannot type binary data, so `ByteArray` crosses the bridge as a base64 string and the
+  generated TypeScript wrapper converts to and from `ArrayBuffer` (the choice CLAUDE.md allows).
+  The shared Kotlin codec accepts both raw bytes (Flutter) and base64 (React Native).
+- Events use `NativeEventEmitter` with the spec's `addListener`/`removeListeners`; the native side
+  collects every event flow while at least one listener exists. Codegen's newer typed
+  `EventEmitter<T>` spec members are a v0.2 option.
+- The generated package pins TypeScript 6 because React Native 0.87's tooling is validated on it,
+  not on TypeScript 7.
+- One TurboModule is registered per facade (`<Module><Facade>`), which keeps Codegen specs typed
+  per facade at the cost of one native module per class.
+
 ## Parser notes (observed while building M1)
 
 - Top-level Kotlin functions (file facades such as `FooKt`) are not listed by `heno inspect`;
