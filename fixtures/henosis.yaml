@@ -1,0 +1,34 @@
+# Henosis config for the sample SDK. Signatures come from the AAR; this file only selects members.
+name: sample_sdk
+version: 0.1.0
+source:
+  aar: ./sample-sdk/build/outputs/aar/sample-sdk-release.aar
+facades:
+  - class: com.devstrike.sample.Greeter
+    as: Greeter
+    constructor: context
+    methods:
+      - greet
+      - greetOptional
+      - greetMany
+      - fetchProfile
+      - divide(Int, Int)
+      - divide(Double, Double) as divideDouble
+      - echoBytes
+    events:
+      - ticks
+  - class: com.devstrike.sample.Counter
+    constructor: none
+    methods:
+      - increment
+      - reset
+      - mix
+types:
+  include: []
+targets:
+  flutter:
+    package: sample_sdk
+    org: com.devstrike
+  react_native:
+    package: "@devstrike/sample-sdk"
+    module: SampleSdk

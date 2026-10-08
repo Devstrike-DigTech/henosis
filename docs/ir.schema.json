@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/devstrike/henosis/docs/ir.schema.json",
+  "title": "Henosis IR",
+  "description": "The intermediate representation written by `heno generate --emit-ir`. Target generators read only this.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["henosisVersion", "name", "version", "facades", "types", "targets"],
+  "properties": {
+    "henosisVersion": { "type": "string", "description": "Henosis version that produced this IR." },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "version": { "type": "string" },
+    "facades": { "type": "array", "items": { "$ref": "#/$defs/facade" } },
+    "types": { "type": "array", "items": { "$ref": "#/$defs/type" } },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "flutter": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["package", "org"],
+          "properties": {
+            "package": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+            "org": { "type": "string" }
+          }
+        },
+        "reactNative": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["package", "module"],
+          "properties": {
+            "package": { "type": "string" },
+            "module": { "type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$" },
+    "typeRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "nullable"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["int", "long", "short", "byte", "double", "float", "boolean", "string", "unit", "byte_array", "list", "map", "data_class", "enum"]
+        },
+        "nullable": { "type": "boolean" },
+        "element": { "$ref": "#/$defs/typeRef", "description": "Element type of a list, or value type of a map (keys are always strings)." },
+        "name": { "$ref": "#/$defs/identifier", "description": "Exposed name of the data class or enum." }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "enum": ["list", "map"] } } }, "then": { "required": ["element"] } },
+        { "if": { "properties": { "kind": { "enum": ["data_class", "enum"] } } }, "then": { "required": ["name"] } }
+      ]
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "type": { "$ref": "#/$defs/typeRef" }
+      }
+    },
+    "method": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "nativeName", "jvmName", "jvmDescriptor", "parameters", "returnType", "isSuspend"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "nativeName": { "$ref": "#/$defs/identifier" },
+        "jvmName": { "type": "string" },
+        "jvmDescriptor": { "type": "string" },
+        "parameters": { "type": "array", "items": { "$ref": "#/$defs/parameter" } },
+        "returnType": { "$ref": "#/$defs/typeRef" },
+        "isSuspend": { "type": "boolean" }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "nativeName", "source", "jvmName", "elementType"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "nativeName": { "$ref": "#/$defs/identifier" },
+        "source": { "type": "string", "enum": ["property", "function"] },
+        "jvmName": { "type": "string" },
+        "elementType": { "$ref": "#/$defs/typeRef" }
+      }
+    },
+    "facade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "nativeClass", "constructor", "methods", "events"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "nativeClass": { "type": "string" },
+        "constructor": { "type": "string", "enum": ["none", "context"] },
+        "methods": { "type": "array", "items": { "$ref": "#/$defs/method" } },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } }
+      }
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "getterJvmName"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "type": { "$ref": "#/$defs/typeRef" },
+        "getterJvmName": { "type": "string" }
+      }
+    },
+    "type": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "nativeClass", "fields", "entries"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["data_class", "enum"] },
+        "name": { "$ref": "#/$defs/identifier" },
+        "nativeClass": { "type": "string" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/field" } },
+        "entries": { "type": "array", "items": { "$ref": "#/$defs/identifier" } },
+        "jvmConstructorDescriptor": { "type": "string" }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "data_class" } } }, "then": { "required": ["jvmConstructorDescriptor"] } }
+      ]
+    }
+  }
+}
