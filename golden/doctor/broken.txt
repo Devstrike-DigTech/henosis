@@ -1,0 +1,8 @@
+error    facades[0].constructor: 'com.devstrike.sample.Greeter' has no public no-argument constructor (available: constructor(context: Context))  fix: set constructor to none or context to match an existing constructor
+error    facades[0].events[0]: event 'count' not found on com.devstrike.sample.Greeter  fix: name a Flow<T> property or a zero-argument function returning Flow<T>
+error    facades[0].methods[1]: 'divide' has 2 overloads; selector is ambiguous: divide(Double, Double) | divide(Int, Int)  fix: add the parameter types, e.g. divide(Double, Double)
+error    facades[0].methods[2]: com.devstrike.sample.Greeter.generic is generic (<T>); generic functions are not supported in v0.1  fix: expose a non-generic overload instead
+error    facades[0].methods[3]: method 'missing' not found on com.devstrike.sample.Greeter  fix: run `heno inspect <sdk.aar>` to list its public members
+error    facades[1].class: 'com.devstrike.sample.Level' is an enum class; v0.1 facades must be plain classes  fix: pick a class with a public constructor
+error    name: 'Sample SDK' is not a valid base name  fix: use lowercase letters, digits and underscores, starting with a letter (e.g. sample_sdk)
+doctor: 7 error(s), 0 warning(s)

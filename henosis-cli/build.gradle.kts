@@ -7,6 +7,7 @@ dependencies {
     implementation(project(":henosis-core"))
     implementation(project(":henosis-parser-android"))
     implementation(libs.clikt)
+    testImplementation(libs.json.schema.validator)
 }
 
 application {

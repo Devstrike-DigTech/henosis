@@ -1,0 +1,347 @@
+{
+  "henosisVersion": "0.1.0",
+  "name": "sample_sdk",
+  "version": "0.1.0",
+  "facades": [
+    {
+      "name": "Greeter",
+      "nativeClass": "com.devstrike.sample.Greeter",
+      "constructor": "context",
+      "methods": [
+        {
+          "name": "greet",
+          "nativeName": "greet",
+          "jvmName": "greet",
+          "jvmDescriptor": "(Ljava/lang/String;)Ljava/lang/String;",
+          "parameters": [
+            {
+              "name": "name",
+              "type": {
+                "kind": "string",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "string",
+            "nullable": false
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "greetOptional",
+          "nativeName": "greetOptional",
+          "jvmName": "greetOptional",
+          "jvmDescriptor": "(Ljava/lang/String;)Ljava/lang/String;",
+          "parameters": [
+            {
+              "name": "name",
+              "type": {
+                "kind": "string",
+                "nullable": true
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "string",
+            "nullable": false
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "greetMany",
+          "nativeName": "greetMany",
+          "jvmName": "greetMany",
+          "jvmDescriptor": "(Ljava/util/List;)Ljava/util/Map;",
+          "parameters": [
+            {
+              "name": "names",
+              "type": {
+                "kind": "list",
+                "nullable": false,
+                "element": {
+                  "kind": "string",
+                  "nullable": false
+                }
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "map",
+            "nullable": false,
+            "element": {
+              "kind": "string",
+              "nullable": false
+            }
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "fetchProfile",
+          "nativeName": "fetchProfile",
+          "jvmName": "fetchProfile",
+          "jvmDescriptor": "(JLkotlin/coroutines/Continuation;)Ljava/lang/Object;",
+          "parameters": [
+            {
+              "name": "id",
+              "type": {
+                "kind": "long",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "data_class",
+            "nullable": true,
+            "name": "Profile"
+          },
+          "isSuspend": true
+        },
+        {
+          "name": "divide",
+          "nativeName": "divide",
+          "jvmName": "divide",
+          "jvmDescriptor": "(II)D",
+          "parameters": [
+            {
+              "name": "a",
+              "type": {
+                "kind": "int",
+                "nullable": false
+              }
+            },
+            {
+              "name": "b",
+              "type": {
+                "kind": "int",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "double",
+            "nullable": false
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "divideDouble",
+          "nativeName": "divide",
+          "jvmName": "divide",
+          "jvmDescriptor": "(DD)D",
+          "parameters": [
+            {
+              "name": "a",
+              "type": {
+                "kind": "double",
+                "nullable": false
+              }
+            },
+            {
+              "name": "b",
+              "type": {
+                "kind": "double",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "double",
+            "nullable": false
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "echoBytes",
+          "nativeName": "echoBytes",
+          "jvmName": "echoBytes",
+          "jvmDescriptor": "([B)[B",
+          "parameters": [
+            {
+              "name": "data",
+              "type": {
+                "kind": "byte_array",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "byte_array",
+            "nullable": false
+          },
+          "isSuspend": false
+        }
+      ],
+      "events": [
+        {
+          "name": "ticks",
+          "nativeName": "ticks",
+          "source": "property",
+          "jvmName": "getTicks",
+          "elementType": {
+            "kind": "int",
+            "nullable": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "Counter",
+      "nativeClass": "com.devstrike.sample.Counter",
+      "constructor": "none",
+      "methods": [
+        {
+          "name": "increment",
+          "nativeName": "increment",
+          "jvmName": "increment",
+          "jvmDescriptor": "(I)I",
+          "parameters": [
+            {
+              "name": "by",
+              "type": {
+                "kind": "int",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "int",
+            "nullable": false
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "reset",
+          "nativeName": "reset",
+          "jvmName": "reset",
+          "jvmDescriptor": "()V",
+          "parameters": [],
+          "returnType": {
+            "kind": "unit",
+            "nullable": false
+          },
+          "isSuspend": false
+        },
+        {
+          "name": "mix",
+          "nativeName": "mix",
+          "jvmName": "mix",
+          "jvmDescriptor": "(SBFZ)D",
+          "parameters": [
+            {
+              "name": "small",
+              "type": {
+                "kind": "short",
+                "nullable": false
+              }
+            },
+            {
+              "name": "tiny",
+              "type": {
+                "kind": "byte",
+                "nullable": false
+              }
+            },
+            {
+              "name": "ratio",
+              "type": {
+                "kind": "float",
+                "nullable": false
+              }
+            },
+            {
+              "name": "enabled",
+              "type": {
+                "kind": "boolean",
+                "nullable": false
+              }
+            }
+          ],
+          "returnType": {
+            "kind": "double",
+            "nullable": false
+          },
+          "isSuspend": false
+        }
+      ],
+      "events": []
+    }
+  ],
+  "types": [
+    {
+      "kind": "enum",
+      "name": "Level",
+      "nativeClass": "com.devstrike.sample.Level",
+      "fields": [],
+      "entries": [
+        "BRONZE",
+        "SILVER",
+        "GOLD"
+      ]
+    },
+    {
+      "kind": "data_class",
+      "name": "Profile",
+      "nativeClass": "com.devstrike.sample.Profile",
+      "fields": [
+        {
+          "name": "id",
+          "type": {
+            "kind": "long",
+            "nullable": false
+          },
+          "getterJvmName": "getId"
+        },
+        {
+          "name": "name",
+          "type": {
+            "kind": "string",
+            "nullable": false
+          },
+          "getterJvmName": "getName"
+        },
+        {
+          "name": "tags",
+          "type": {
+            "kind": "list",
+            "nullable": false,
+            "element": {
+              "kind": "string",
+              "nullable": false
+            }
+          },
+          "getterJvmName": "getTags"
+        },
+        {
+          "name": "level",
+          "type": {
+            "kind": "enum",
+            "nullable": false,
+            "name": "Level"
+          },
+          "getterJvmName": "getLevel"
+        },
+        {
+          "name": "avatar",
+          "type": {
+            "kind": "byte_array",
+            "nullable": true
+          },
+          "getterJvmName": "getAvatar"
+        }
+      ],
+      "entries": [],
+      "jvmConstructorDescriptor": "(JLjava/lang/String;Ljava/util/List;Lcom/devstrike/sample/Level;[B)V"
+    }
+  ],
+  "targets": {
+    "flutter": {
+      "package": "sample_sdk",
+      "org": "com.devstrike"
+    },
+    "reactNative": {
+      "package": "@devstrike/sample-sdk",
+      "module": "SampleSdk"
+    }
+  }
+}

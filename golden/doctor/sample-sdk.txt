@@ -1,0 +1,3 @@
+warning  facades[0].methods[3]: com.devstrike.sample.Greeter.fetchProfile parameter 'id': Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)
+warning  types[com.devstrike.sample.Profile].id: type: Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)
+doctor: 0 error(s), 2 warning(s)
