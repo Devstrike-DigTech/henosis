@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     api(libs.kotlinx.serialization.json)
+    implementation(libs.kaml)
 }
 
 tasks.processResources {
