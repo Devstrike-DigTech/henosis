@@ -3,11 +3,25 @@ package com.devstrike.henosis.core.codegen
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** One generated text file, with a path relative to the package root (always `/`-separated). */
+/**
+ * One generated text file, with a path relative to the package root (always `/`-separated).
+ * [executable] marks scripts such as `gradlew` that must carry the execute bit.
+ */
 data class GeneratedFile(
     val path: String,
     val content: String,
+    val executable: Boolean = false,
 )
+
+/** A binary file generated from embedded bytes (for example the Gradle wrapper jar). Not part of golden snapshots. */
+data class BinaryFile(
+    val path: String,
+    val bytes: ByteArray,
+) {
+    override fun equals(other: Any?): Boolean = other is BinaryFile && other.path == path && other.bytes.contentEquals(bytes)
+
+    override fun hashCode(): Int = path.hashCode()
+}
 
 /** A binary that must be copied verbatim into the package (the SDK's `.aar`). */
 data class CopiedFile(
@@ -23,6 +37,7 @@ data class GeneratedPackage(
     val root: String,
     val files: List<GeneratedFile>,
     val copies: List<CopiedFile> = emptyList(),
+    val binaries: List<BinaryFile> = emptyList(),
 ) {
     /** Writes the package under [outputRoot], replacing any previous generated files. */
     fun write(outputRoot: Path): Path {
@@ -31,6 +46,12 @@ data class GeneratedPackage(
             val target = dir.resolve(f.path)
             Files.createDirectories(target.parent)
             Files.writeString(target, f.content)
+            if (f.executable) target.toFile().setExecutable(true, false)
+        }
+        binaries.forEach { b ->
+            val target = dir.resolve(b.path)
+            Files.createDirectories(target.parent)
+            Files.write(target, b.bytes)
         }
         copies.forEach { c ->
             val target = dir.resolve(c.path)

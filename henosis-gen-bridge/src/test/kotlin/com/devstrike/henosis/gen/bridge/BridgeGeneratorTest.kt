@@ -45,7 +45,8 @@ class BridgeGeneratorTest {
         codecs shouldContain "public fun decodeProfile(`value`: Map<*, *>): Profile"
         codecs shouldContain "\"level\" to value.level.name"
         codecs shouldContain "Level.valueOf(value[\"level\"] as String)"
-        codecs shouldContain "(value[\"avatar\"] as ByteArray?)"
+        codecs shouldContain "value[\"avatar\"]?.let { v2 -> HenosisCodecs.decodeBytes(v2) }"
+        codecs shouldContain "public fun decodeBytes(`value`: Any?): ByteArray"
         codecs.indexOf("value[\"id\"]") shouldBeLessThan codecs.indexOf("value[\"name\"]")
     }
 }

@@ -28,7 +28,7 @@ public class GreeterBridge(
         "fetchProfile" -> target.fetchProfile((args["id"] as Number).toLong())?.let { v1 -> HenosisCodecs.encodeProfile(v1) }
         "divide" -> target.divide((args["a"] as Number).toInt(), (args["b"] as Number).toInt())
         "divideDouble" -> target.divide((args["a"] as Number).toDouble(), (args["b"] as Number).toDouble())
-        "echoBytes" -> target.echoBytes((args["data"] as ByteArray))
+        "echoBytes" -> target.echoBytes(HenosisCodecs.decodeBytes(args["data"]))
         else -> throw NoSuchMethodException(method)
     }
 

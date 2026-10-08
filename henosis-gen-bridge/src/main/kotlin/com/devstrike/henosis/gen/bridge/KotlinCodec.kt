@@ -28,7 +28,7 @@ internal class KotlinCodec(
         expr: CodeBlock,
     ): CodeBlock {
         if (!type.nullable) return decodeNonNull(type, expr)
-        if (isIdentity(type) && type.kind != IrTypeKind.LIST && type.kind != IrTypeKind.MAP) {
+        if (isIdentity(type) && type.kind != IrTypeKind.LIST && type.kind != IrTypeKind.MAP && type.kind != IrTypeKind.BYTE_ARRAY) {
             return CodeBlock.of("(%L as %T)", expr, KotlinTypeNames.of(type, ir))
         }
         val v = fresh()
@@ -76,8 +76,9 @@ internal class KotlinCodec(
                 CodeBlock.of("Unit")
             }
 
+            // Flutter sends real byte arrays; React Native sends base64 strings. The codec accepts both.
             IrTypeKind.BYTE_ARRAY -> {
-                CodeBlock.of("(%L as ByteArray)", expr)
+                CodeBlock.of("%T.decodeBytes(%L)", codecs, expr)
             }
 
             IrTypeKind.LIST -> {

@@ -46,7 +46,7 @@ object BridgeGenerator {
     ): List<GeneratedFile> {
         val codecs = ClassName(packageName, CODECS_CLASS)
         val files = mutableListOf<GeneratedFile>()
-        if (ir.types.any { it.kind == IrTypeKind.DATA_CLASS }) files += codecsFile(ir, packageName, codecs)
+        files += codecsFile(ir, packageName, codecs)
         ir.facades.forEach { facade -> files += facadeFile(ir, packageName, codecs, facade) }
         return files
     }
@@ -59,12 +59,29 @@ object BridgeGenerator {
         packageName: String,
         codecs: ClassName,
     ): GeneratedFile {
-        val type = TypeSpec.objectBuilder(codecs).addKdoc("Converts the SDK's data classes to and from channel maps.\n")
+        val type = TypeSpec.objectBuilder(codecs).addKdoc("Converts the SDK's values to and from their channel representation.\n")
+        type.addFunction(decodeBytesFunction())
         ir.types.filter { it.kind == IrTypeKind.DATA_CLASS }.forEach { dataClass ->
             type.addFunction(encodeFunction(ir, dataClass, codecs))
             type.addFunction(decodeFunction(ir, dataClass, codecs))
         }
         return file(packageName, CODECS_CLASS, type.build(), ir)
+    }
+
+    /** `decodeBytes`: accepts a `ByteArray` (Flutter) or a base64 `String` (React Native). */
+    private fun decodeBytesFunction(): FunSpec {
+        val base64 = ClassName("android.util", "Base64")
+        return FunSpec
+            .builder("decodeBytes")
+            .addKdoc("Accepts a raw `ByteArray` or a base64 `String`, depending on what the framework channel can carry.\n")
+            .addParameter("value", ANY.copy(nullable = true))
+            .returns(com.squareup.kotlinpoet.BYTE_ARRAY)
+            .beginControlFlow("return when (value)")
+            .addStatement("is ByteArray -> value")
+            .addStatement("is String -> %T.decode(value, %T.DEFAULT)", base64, base64)
+            .addStatement("else -> throw %T(%S + value?.javaClass?.name)", IllegalArgumentException::class, "expected bytes, got ")
+            .endControlFlow()
+            .build()
     }
 
     private fun encodeFunction(
