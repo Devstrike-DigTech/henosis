@@ -5,11 +5,20 @@
   "description": "The intermediate representation written by `heno generate --emit-ir`. Target generators read only this.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["henosisVersion", "name", "version", "facades", "types", "targets"],
+  "required": ["henosisVersion", "name", "version", "source", "facades", "types", "targets"],
   "properties": {
     "henosisVersion": { "type": "string", "description": "Henosis version that produced this IR." },
     "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
     "version": { "type": "string" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coordinates"],
+      "properties": {
+        "coordinates": { "type": "string", "description": "Maven coordinates group:artifact:version of the native SDK." },
+        "aarFileName": { "type": "string", "description": "File name of the local .aar shipped inside the package, when the source is a local archive." }
+      }
+    },
     "facades": { "type": "array", "items": { "$ref": "#/$defs/facade" } },
     "types": { "type": "array", "items": { "$ref": "#/$defs/type" } },
     "targets": {

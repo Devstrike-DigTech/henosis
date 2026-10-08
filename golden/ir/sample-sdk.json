@@ -2,6 +2,10 @@
   "henosisVersion": "0.1.0",
   "name": "sample_sdk",
   "version": "0.1.0",
+  "source": {
+    "coordinates": "henosis.local:sample_sdk:0.1.0",
+    "aarFileName": "sample-sdk-release.aar"
+  },
   "facades": [
     {
       "name": "Greeter",

@@ -17,10 +17,26 @@ data class Ir(
     val name: String,
     /** Version of the generated packages. */
     val version: String,
+    /** Where the native SDK comes from, so generators can declare the dependency. */
+    val source: IrSource,
     val facades: List<IrFacade>,
     /** Data classes and enums that cross the bridge, sorted by name. */
     val types: List<IrType>,
     val targets: IrTargets,
+)
+
+/**
+ * The native SDK artifact.
+ *
+ * @property coordinates Maven coordinates `group:artifact:version` the generated build files depend on.
+ *   For a local `.aar` Henosis assigns `henosis.local:<name>:<version>` and ships the file in a
+ *   package-local Maven repository.
+ * @property aarFileName the `.aar` file name when the source is a local archive, else `null`.
+ */
+@Serializable
+data class IrSource(
+    val coordinates: String,
+    val aarFileName: String? = null,
 )
 
 @Serializable

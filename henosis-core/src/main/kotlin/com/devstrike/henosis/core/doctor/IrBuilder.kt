@@ -20,6 +20,7 @@ import com.devstrike.henosis.core.ir.IrFlutterTarget
 import com.devstrike.henosis.core.ir.IrMethod
 import com.devstrike.henosis.core.ir.IrParameter
 import com.devstrike.henosis.core.ir.IrReactNativeTarget
+import com.devstrike.henosis.core.ir.IrSource
 import com.devstrike.henosis.core.ir.IrTargets
 import com.devstrike.henosis.core.ir.IrType
 import com.devstrike.henosis.core.ir.IrTypeKind
@@ -67,6 +68,7 @@ internal class IrBuilder(
                     henosisVersion = henosisVersion,
                     name = config.name,
                     version = config.version,
+                    source = source(),
                     facades = facades,
                     types = types,
                     targets = targets,
@@ -76,6 +78,16 @@ internal class IrBuilder(
     }
 
     // ---- top-level keys -------------------------------------------------------------------------
+
+    private fun source(): IrSource {
+        val maven = config.source.maven
+        if (maven != null) return IrSource(coordinates = maven)
+        val fileName =
+            config.source.aar
+                ?.substringAfterLast('/')
+                ?.substringAfterLast('\\') ?: "sdk.aar"
+        return IrSource(coordinates = "henosis.local:${config.name}:${config.version}", aarFileName = fileName)
+    }
 
     private fun checkName() {
         if (!PACKAGE_NAME.matches(config.name)) {

@@ -73,6 +73,8 @@ class DoctorTest {
         val ir = result.ir.shouldNotBeNull()
         ir.name shouldBe "sample_sdk"
         ir.henosisVersion shouldBe "0.1.0"
+        ir.source.coordinates shouldBe "henosis.local:sample_sdk:0.1.0"
+        ir.source.aarFileName shouldBe "sdk.aar"
         ir.facades.map { it.name } shouldContainExactly listOf("Greeter", "Counter")
         val greeter = ir.facades[0]
         greeter.nativeClass shouldBe TestSdk.GREETER
