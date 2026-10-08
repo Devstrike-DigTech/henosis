@@ -3,5 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":henosis-core"))
+    api(project(":henosis-core"))
+    implementation(libs.kotlinpoet)
+    testImplementation(testFixtures(project(":henosis-core")))
 }
