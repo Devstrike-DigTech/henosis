@@ -1,0 +1,228 @@
+{
+  "format": 1,
+  "classes": [
+    {
+      "name": "com.devstrike.sample.Counter",
+      "kind": "class",
+      "status": "ok",
+      "constructors": [
+        {
+          "name": "<init>",
+          "signature": "constructor()",
+          "status": "ok"
+        }
+      ],
+      "functions": [
+        {
+          "name": "increment",
+          "signature": "fun increment(by: Int = ...): Int",
+          "status": "ok"
+        },
+        {
+          "name": "mix",
+          "signature": "fun mix(small: Short, tiny: Byte, ratio: Float, enabled: Boolean): Double",
+          "status": "ok"
+        },
+        {
+          "name": "reset",
+          "signature": "fun reset(): Unit",
+          "status": "ok"
+        }
+      ],
+      "properties": [
+        {
+          "name": "count",
+          "signature": "val count: Int",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "com.devstrike.sample.Greeter",
+      "kind": "class",
+      "status": "unsupported",
+      "constructors": [
+        {
+          "name": "<init>",
+          "signature": "constructor(context: Context)",
+          "status": "ok"
+        }
+      ],
+      "functions": [
+        {
+          "name": "divide",
+          "signature": "fun divide(a: Double, b: Double): Double",
+          "status": "ok"
+        },
+        {
+          "name": "divide",
+          "signature": "fun divide(a: Int, b: Int): Double",
+          "status": "ok"
+        },
+        {
+          "name": "echoBytes",
+          "signature": "fun echoBytes(data: ByteArray): ByteArray",
+          "status": "ok"
+        },
+        {
+          "name": "fetchProfile",
+          "signature": "suspend fun fetchProfile(id: Long): Profile?",
+          "status": "warn",
+          "findings": [
+            {
+              "level": "warn",
+              "message": "parameter 'id': Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)"
+            }
+          ]
+        },
+        {
+          "name": "generic",
+          "signature": "fun <T> generic(x: T): T",
+          "status": "unsupported",
+          "findings": [
+            {
+              "level": "unsupported",
+              "message": "parameter 'x': generic type parameter 'T' is not supported in v0.1; use a concrete type"
+            },
+            {
+              "level": "unsupported",
+              "message": "return type: generic type parameter 'T' is not supported in v0.1; use a concrete type"
+            }
+          ]
+        },
+        {
+          "name": "greet",
+          "signature": "fun greet(name: String): String",
+          "status": "ok"
+        },
+        {
+          "name": "greetMany",
+          "signature": "fun greetMany(names: List<String>): Map<String, String>",
+          "status": "ok"
+        },
+        {
+          "name": "greetOptional",
+          "signature": "fun greetOptional(name: String?): String",
+          "status": "ok"
+        }
+      ],
+      "properties": [
+        {
+          "name": "ticks",
+          "signature": "val ticks: Flow<Int>",
+          "status": "ok"
+        }
+      ]
+    },
+    {
+      "name": "com.devstrike.sample.LegacyApi",
+      "kind": "class",
+      "status": "warn",
+      "constructors": [
+        {
+          "name": "<init>",
+          "signature": "constructor()",
+          "status": "ok"
+        }
+      ],
+      "functions": [
+        {
+          "name": "count",
+          "signature": "fun count(): Int",
+          "status": "ok"
+        },
+        {
+          "name": "names",
+          "signature": "fun names(): List<String!>!",
+          "status": "warn",
+          "findings": [
+            {
+              "level": "warn",
+              "message": "return type: 'List<String!>!' comes from Java, so its nullability is unknown; Henosis treats it as nullable"
+            },
+            {
+              "level": "warn",
+              "message": "return type: 'String!' comes from Java, so its nullability is unknown; Henosis treats it as nullable"
+            }
+          ]
+        },
+        {
+          "name": "ping",
+          "signature": "fun ping(message: String!): String!",
+          "status": "warn",
+          "findings": [
+            {
+              "level": "warn",
+              "message": "parameter 'message': 'String!' comes from Java, so its nullability is unknown; Henosis treats it as nullable"
+            },
+            {
+              "level": "warn",
+              "message": "return type: 'String!' comes from Java, so its nullability is unknown; Henosis treats it as nullable"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "com.devstrike.sample.Level",
+      "kind": "enum_class",
+      "status": "ok",
+      "enumEntries": [
+        "BRONZE",
+        "SILVER",
+        "GOLD"
+      ]
+    },
+    {
+      "name": "com.devstrike.sample.Profile",
+      "kind": "data_class",
+      "status": "warn",
+      "constructors": [
+        {
+          "name": "<init>",
+          "signature": "constructor(id: Long, name: String, tags: List<String>, level: Level, avatar: ByteArray?)",
+          "status": "warn",
+          "findings": [
+            {
+              "level": "warn",
+              "message": "parameter 'id': Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)"
+            }
+          ]
+        }
+      ],
+      "properties": [
+        {
+          "name": "avatar",
+          "signature": "val avatar: ByteArray?",
+          "status": "ok"
+        },
+        {
+          "name": "id",
+          "signature": "val id: Long",
+          "status": "warn",
+          "findings": [
+            {
+              "level": "warn",
+              "message": "type: Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)"
+            }
+          ]
+        },
+        {
+          "name": "level",
+          "signature": "val level: Level",
+          "status": "ok"
+        },
+        {
+          "name": "name",
+          "signature": "val name: String",
+          "status": "ok"
+        },
+        {
+          "name": "tags",
+          "signature": "val tags: List<String>",
+          "status": "ok"
+        }
+      ]
+    }
+  ]
+}

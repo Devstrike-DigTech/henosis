@@ -1,0 +1,46 @@
+com.devstrike.sample.Counter  class  [ok]
+  constructor()  [ok]
+  fun increment(by: Int = ...): Int  [ok]
+  fun mix(small: Short, tiny: Byte, ratio: Float, enabled: Boolean): Double  [ok]
+  fun reset(): Unit  [ok]
+  val count: Int  [ok]
+
+com.devstrike.sample.Greeter  class  [unsupported]
+  constructor(context: Context)  [ok]
+  fun divide(a: Double, b: Double): Double  [ok]
+  fun divide(a: Int, b: Int): Double  [ok]
+  fun echoBytes(data: ByteArray): ByteArray  [ok]
+  suspend fun fetchProfile(id: Long): Profile?  [warn]
+      - parameter 'id': Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)
+  fun <T> generic(x: T): T  [unsupported]
+      - parameter 'x': generic type parameter 'T' is not supported in v0.1; use a concrete type
+      - return type: generic type parameter 'T' is not supported in v0.1; use a concrete type
+  fun greet(name: String): String  [ok]
+  fun greetMany(names: List<String>): Map<String, String>  [ok]
+  fun greetOptional(name: String?): String  [ok]
+  val ticks: Flow<Int>  [ok]
+
+com.devstrike.sample.LegacyApi  class  [warn]
+  constructor()  [ok]
+  fun count(): Int  [ok]
+  fun names(): List<String!>!  [warn]
+      - return type: 'List<String!>!' comes from Java, so its nullability is unknown; Henosis treats it as nullable
+      - return type: 'String!' comes from Java, so its nullability is unknown; Henosis treats it as nullable
+  fun ping(message: String!): String!  [warn]
+      - parameter 'message': 'String!' comes from Java, so its nullability is unknown; Henosis treats it as nullable
+      - return type: 'String!' comes from Java, so its nullability is unknown; Henosis treats it as nullable
+
+com.devstrike.sample.Level  enum class  [ok]
+  entries: BRONZE, SILVER, GOLD
+
+com.devstrike.sample.Profile  data class  [warn]
+  constructor(id: Long, name: String, tags: List<String>, level: Level, avatar: ByteArray?)  [warn]
+      - parameter 'id': Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)
+  val avatar: ByteArray?  [ok]
+  val id: Long  [warn]
+      - type: Long values above 2^53 lose precision in JavaScript (React Native maps Long to number)
+  val level: Level  [ok]
+  val name: String  [ok]
+  val tags: List<String>  [ok]
+
+5 class(es): 2 ok, 2 warn, 1 unsupported
