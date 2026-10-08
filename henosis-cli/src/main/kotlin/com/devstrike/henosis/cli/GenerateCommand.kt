@@ -1,6 +1,8 @@
 package com.devstrike.henosis.cli
 
+import com.devstrike.henosis.core.codegen.GeneratorContext
 import com.devstrike.henosis.core.ir.IrJson
+import com.devstrike.henosis.gen.flutter.FlutterGenerator
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.Context
 import com.github.ajalt.clikt.core.ProgramResult
@@ -29,6 +31,7 @@ class GenerateCommand : CliktCommand(name = "generate") {
     override fun run() {
         val unknown = targets.filter { it !in KNOWN_TARGETS }
         if (unknown.isNotEmpty()) fail("error    --target: unknown target(s) ${unknown.joinToString()}; use flutter and/or rn")
+        val loaded = loadConfig(config)
         val result = runDoctor(config)
         val ir = result.ir ?: throw ProgramResult(ExitCode.VALIDATION)
         Files.createDirectories(out)
@@ -39,18 +42,33 @@ class GenerateCommand : CliktCommand(name = "generate") {
         }
         val wanted =
             targets.ifEmpty {
-                listOfNotNull(ir.targets.flutter?.let { "flutter" }, ir.targets.reactNative?.let { "rn" })
+                listOfNotNull(ir.targets.flutter?.let { FlutterGenerator.TARGET }, ir.targets.reactNative?.let { "rn" })
             }
-        wanted.forEach { target ->
-            echo(
-                "generate: the $target generator is not available yet (${if (target == "flutter") "milestone M3" else "milestone M4"})",
-                err = true,
+        val context =
+            GeneratorContext(
+                aarFile =
+                    loaded.config.source.aar
+                        ?.let { loaded.resolve(it) },
             )
+        var generated = 0
+        wanted.forEach { target ->
+            when (target) {
+                FlutterGenerator.TARGET -> {
+                    if (ir.targets.flutter == null) fail("error    --target flutter: the config has no targets.flutter section")
+                    val dir = FlutterGenerator.generate(ir, context).write(out)
+                    echo("Wrote Flutter plugin to $dir")
+                    generated++
+                }
+
+                else -> {
+                    echo("generate: the $target generator is not available yet (milestone M4)", err = true)
+                }
+            }
         }
-        if (!emitIr) fail("error    nothing to generate yet; pass --emit-ir to write the IR")
+        if (generated == 0 && !emitIr) fail("error    nothing was generated; add targets.flutter or pass --emit-ir")
     }
 
     private companion object {
-        val KNOWN_TARGETS = setOf("flutter", "rn")
+        val KNOWN_TARGETS = setOf(FlutterGenerator.TARGET, "rn")
     }
 }

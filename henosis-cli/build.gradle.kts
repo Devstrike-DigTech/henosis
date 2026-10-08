@@ -6,8 +6,10 @@ plugins {
 dependencies {
     implementation(project(":henosis-core"))
     implementation(project(":henosis-parser-android"))
+    implementation(project(":henosis-gen-flutter"))
     implementation(libs.clikt)
     testImplementation(libs.json.schema.validator)
+    testImplementation(testFixtures(project(":henosis-core")))
 }
 
 application {

@@ -2,6 +2,7 @@ package com.devstrike.henosis.cli
 
 import com.devstrike.henosis.core.config.ConfigLoader
 import com.devstrike.henosis.core.ir.IrJson
+import com.devstrike.henosis.testing.Golden
 import com.github.ajalt.clikt.testing.test
 import com.networknt.schema.InputFormat
 import com.networknt.schema.SchemaRegistry
@@ -100,12 +101,27 @@ class ConfigCommandsTest {
     }
 
     @Test
-    fun `generate without --emit-ir has nothing to produce yet`() {
-        val out = workDir.resolve("generate-none")
+    fun `generate writes the Flutter package and copies the aar`() {
+        val out = workDir.resolve("generate-flutter")
         val result = heno().test(listOf("generate", "-c", fixtureConfig.toString(), "--out", out.toString()))
+        result.statusCode shouldBe 0
+        result.stdout shouldContain "Wrote Flutter plugin to"
+        result.stderr shouldContain "rn generator is not available yet"
+        val plugin = out.resolve("flutter/sample_sdk")
+        Files.isRegularFile(plugin.resolve("pubspec.yaml")) shouldBe true
+        Files.isRegularFile(plugin.resolve("lib/src/greeter.dart")) shouldBe true
+        Files.isRegularFile(plugin.resolve("android/libs/maven/henosis/local/sample_sdk/0.1.0/sample_sdk-0.1.0.aar")) shouldBe true
+        Files.size(plugin.resolve("android/libs/maven/henosis/local/sample_sdk/0.1.0/sample_sdk-0.1.0.aar")) shouldBe
+            Files.size(Golden.sampleAar)
+    }
+
+    @Test
+    fun `generate --target rn alone has nothing to produce yet`() {
+        val out = workDir.resolve("generate-rn")
+        val result = heno().test(listOf("generate", "-c", fixtureConfig.toString(), "--target", "rn", "--out", out.toString()))
         result.statusCode shouldBe 1
-        result.stderr shouldContain "flutter generator is not available yet"
-        result.stderr shouldContain "--emit-ir"
+        result.stderr shouldContain "rn generator is not available yet"
+        result.stderr shouldContain "nothing was generated"
     }
 
     @Test

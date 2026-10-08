@@ -1,6 +1,7 @@
 package com.devstrike.henosis.cli
 
 import com.devstrike.henosis.core.HenosisVersion
+import com.devstrike.henosis.testing.Golden
 import com.github.ajalt.clikt.testing.test
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain

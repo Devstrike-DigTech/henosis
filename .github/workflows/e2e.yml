@@ -1,0 +1,52 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    name: Generated Flutter plugin builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: "platforms;android-36 build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.6"
+          channel: stable
+          cache: true
+
+      - name: Build heno and the sample SDK
+        run: ./gradlew :henosis-cli:installDist
+
+      - name: Generate the Flutter package
+        run: henosis-cli/build/install/heno/bin/heno generate -c fixtures/henosis.yaml --target flutter --out henosis-out
+
+      - name: Analyze the generated plugin
+        working-directory: henosis-out/flutter/sample_sdk
+        run: |
+          flutter pub get
+          dart analyze --fatal-infos
+
+      - name: Analyze and build the generated example app
+        working-directory: henosis-out/flutter/sample_sdk/example
+        run: |
+          flutter pub get
+          dart analyze --fatal-infos
+          flutter build apk --debug
