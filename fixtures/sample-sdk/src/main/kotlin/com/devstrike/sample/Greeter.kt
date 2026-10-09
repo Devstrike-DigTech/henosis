@@ -69,4 +69,12 @@ class Greeter(
 
     /** Deliberately unsupported in v0.1: a generic type parameter. `heno doctor` must reject it. */
     fun <T> generic(x: T): T = x
+
+    /** Deprecated with a warning: still callable, so Henosis only flags it. */
+    @Deprecated("use greet", ReplaceWith("greet(name)"))
+    fun oldGreet(name: String): String = greet(name)
+
+    /** Deprecated at ERROR level: the compiler refuses calls, so Henosis must refuse it too. */
+    @Deprecated("moved to greet", level = DeprecationLevel.ERROR)
+    fun legacyGreet(name: String): String = greet(name)
 }
