@@ -104,6 +104,28 @@
           "name": "greetOptional",
           "signature": "fun greetOptional(name: String?): String",
           "status": "ok"
+        },
+        {
+          "name": "legacyGreet",
+          "signature": "fun legacyGreet(name: String): String",
+          "status": "unsupported",
+          "findings": [
+            {
+              "level": "unsupported",
+              "message": "deprecated with level ERROR: moved to greet; generated code could not call it"
+            }
+          ]
+        },
+        {
+          "name": "oldGreet",
+          "signature": "fun oldGreet(name: String): String",
+          "status": "warn",
+          "findings": [
+            {
+              "level": "warn",
+              "message": "deprecated: use greet"
+            }
+          ]
         }
       ],
       "properties": [

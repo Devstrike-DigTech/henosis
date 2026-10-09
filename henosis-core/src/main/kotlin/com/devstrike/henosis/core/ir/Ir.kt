@@ -32,11 +32,13 @@ data class Ir(
  *   For a local `.aar` Henosis assigns `henosis.local:<name>:<version>` and ships the file in a
  *   package-local Maven repository.
  * @property aarFileName the `.aar` file name when the source is a local archive, else `null`.
+ * @property repositories extra Maven repositories (besides Google and Maven Central) consumers need to resolve the SDK.
  */
 @Serializable
 data class IrSource(
     val coordinates: String,
     val aarFileName: String? = null,
+    val repositories: List<String> = emptyList(),
 )
 
 @Serializable

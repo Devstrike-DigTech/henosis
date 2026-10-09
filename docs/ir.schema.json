@@ -16,7 +16,8 @@
       "required": ["coordinates"],
       "properties": {
         "coordinates": { "type": "string", "description": "Maven coordinates group:artifact:version of the native SDK." },
-        "aarFileName": { "type": "string", "description": "File name of the local .aar shipped inside the package, when the source is a local archive." }
+        "aarFileName": { "type": "string", "description": "File name of the local .aar shipped inside the package, when the source is a local archive." },
+        "repositories": { "type": "array", "items": { "type": "string" }, "description": "Extra Maven repositories consumers need, besides Google and Maven Central." }
       }
     },
     "facades": { "type": "array", "items": { "$ref": "#/$defs/facade" } },

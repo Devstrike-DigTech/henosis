@@ -86,6 +86,26 @@ data class ApiClass(
         }
 }
 
+/** How strongly a member is deprecated. [ERROR] and [HIDDEN] members cannot be called from generated code. */
+@Serializable
+enum class ApiDeprecationLevel {
+    @SerialName("warning")
+    WARNING,
+
+    @SerialName("error")
+    ERROR,
+
+    @SerialName("hidden")
+    HIDDEN,
+}
+
+/** A `@Deprecated` annotation on a member (Kotlin or Java). */
+@Serializable
+data class ApiDeprecation(
+    val level: ApiDeprecationLevel,
+    val message: String? = null,
+)
+
 /** A public constructor. [jvmDescriptor] is the JVM method descriptor, used by the bridge generator. */
 @Serializable
 data class ApiConstructor(
@@ -108,6 +128,7 @@ data class ApiFunction(
     val typeParameters: List<String> = emptyList(),
     val jvmName: String,
     val jvmDescriptor: String,
+    val deprecation: ApiDeprecation? = null,
 )
 
 /** A public property (or, for Java classes, a public field). */
@@ -117,6 +138,7 @@ data class ApiProperty(
     val type: TypeRef,
     val isMutable: Boolean = false,
     val getterJvmName: String? = null,
+    val deprecation: ApiDeprecation? = null,
 )
 
 /** One value parameter. [hasDefault] is true when the Kotlin declaration gives a default argument. */

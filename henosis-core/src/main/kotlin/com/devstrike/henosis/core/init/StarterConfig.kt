@@ -13,13 +13,27 @@ import com.devstrike.henosis.core.types.SupportLevel
  * bindable class listed as a commented-out facade, so the user only uncomments what they want.
  */
 object StarterConfig {
+    /** Where the starter config says the SDK comes from. */
+    sealed interface Source {
+        /** A local archive; [path] is written as given, relative to the config file. */
+        data class Aar(
+            val path: String,
+        ) : Source
+
+        /** Maven coordinates plus extra repositories. */
+        data class Maven(
+            val coordinates: String,
+            val repositories: List<String> = emptyList(),
+        ) : Source
+    }
+
     /**
-     * @param aarPath the value to write under `source.aar`, as the user should see it.
+     * @param source what to write under `source`.
      * @param name the base name; see [deriveName].
      */
     fun render(
         model: ApiModel,
-        aarPath: String,
+        source: Source,
         name: String,
         henosisVersion: String,
     ): String {
@@ -35,7 +49,20 @@ object StarterConfig {
             appendLine("name: $name")
             appendLine("version: 0.1.0")
             appendLine("source:")
-            appendLine("  aar: ${yamlString(aarPath)}")
+            when (source) {
+                is Source.Aar -> {
+                    appendLine("  aar: ${yamlString(source.path)}")
+                }
+
+                is Source.Maven -> {
+                    appendLine("  maven: ${yamlString(source.coordinates)}")
+                    if (source.repositories.isNotEmpty()) {
+                        appendLine(
+                            "  repositories: [${source.repositories.joinToString(", ") { yamlString(it) }}]",
+                        )
+                    }
+                }
+            }
             appendLine("facades:")
             if (facades.isEmpty()) appendLine("  # (no plain public classes with a usable constructor were found)")
             facades.forEach { cls -> appendFacade(cls, report.getValue(cls.name).functions, report.getValue(cls.name).properties) }
@@ -122,7 +149,7 @@ object StarterConfig {
         }
 
     private fun yamlString(value: String): String =
-        if (Regex("[A-Za-z0-9_./-]+").matches(value) &&
+        if (Regex("[A-Za-z0-9_./:-]+").matches(value) &&
             !value.startsWith("-")
         ) {
             value
@@ -142,7 +169,7 @@ object StarterConfig {
      * Build-variant suffixes are dropped and anything that is not a letter or digit becomes `_`.
      */
     fun deriveName(fileName: String): String {
-        var base = fileName.substringBeforeLast('.').lowercase()
+        var base = (if (fileName.contains(':')) fileName.split(':')[1] else fileName.substringBeforeLast('.')).lowercase()
         base =
             base
                 .removeSuffix("-release")

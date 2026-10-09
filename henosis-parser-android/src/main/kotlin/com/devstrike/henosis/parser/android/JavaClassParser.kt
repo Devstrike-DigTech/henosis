@@ -37,6 +37,7 @@ internal object JavaClassParser {
                 else -> ApiClassKind.CLASS
             }
         val classSignature = node.signature?.let { ClassSignature.parse(it) }
+        val deprecations = Deprecations(node)
         val constructors =
             node.methods
                 .filter { it.name == "<init>" && it.isPublic() && !it.isSynthetic() }
@@ -58,6 +59,7 @@ internal object JavaClassParser {
                         typeParameters = sig.typeParameters,
                         jvmName = m.name,
                         jvmDescriptor = m.desc,
+                        deprecation = deprecations.of(m.name, m.desc),
                     )
                 }.sortedWith(compareBy({ it.name }, { it.jvmDescriptor }))
         val properties =

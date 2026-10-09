@@ -38,13 +38,26 @@ object Doctor {
             }
 
             source.maven != null -> {
-                findings +=
-                    DoctorFinding(
-                        DoctorLevel.ERROR,
-                        "source.maven",
-                        "Maven coordinates are not supported yet (planned for milestone M5)",
-                        "download the artifact and point source.aar at the .aar file",
-                    )
+                if (!MAVEN_COORDINATES.matches(source.maven)) {
+                    findings +=
+                        DoctorFinding(
+                            DoctorLevel.ERROR,
+                            "source.maven",
+                            "'${source.maven}' is not group:artifact:version",
+                            "use Maven coordinates such as com.squareup.okio:okio-jvm:3.18.2",
+                        )
+                }
+                source.repositories.forEachIndexed { i, url ->
+                    if (!url.startsWith("https://") && !url.startsWith("http://") && !url.startsWith("file:")) {
+                        findings +=
+                            DoctorFinding(
+                                DoctorLevel.ERROR,
+                                "source.repositories[$i]",
+                                "'$url' is not a repository URL",
+                                "use an https:// (or file:) URL",
+                            )
+                    }
+                }
             }
 
             else -> {
@@ -65,6 +78,8 @@ object Doctor {
         }
         return findings
     }
+
+    private val MAVEN_COORDINATES = Regex("[A-Za-z0-9_.\\-]+:[A-Za-z0-9_.\\-]+:[A-Za-z0-9_.\\-]+")
 
     /** Runs every rule against [model] and returns the findings plus the IR when error-free. */
     fun run(

@@ -25,6 +25,8 @@ facades:
   #     - greet
   #     - greetMany
   #     - greetOptional
+  #     - legacyGreet   # unsupported: deprecated with level ERROR: moved to greet; generated code could not call it
+  #     - oldGreet   # warn: deprecated: use greet
   #   events:
   #     - ticks
   # - class: com.devstrike.sample.LegacyApi

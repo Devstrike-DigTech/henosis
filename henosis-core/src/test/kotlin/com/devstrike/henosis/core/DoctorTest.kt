@@ -182,9 +182,23 @@ class DoctorTest {
             it.message shouldContain "file not found"
         }
         Doctor
-            .checkSource(loaded.copy(config = loaded.config.copy(source = loaded.config.source.copy(aar = null, maven = "g:a:1"))))
+            .checkSource(
+                loaded.copy(config = loaded.config.copy(source = loaded.config.source.copy(aar = null, maven = "g:a:1"))),
+            ).shouldBeEmpty()
+        Doctor
+            .checkSource(loaded.copy(config = loaded.config.copy(source = loaded.config.source.copy(aar = null, maven = "g:a"))))
             .single()
             .path shouldBe "source.maven"
+        Doctor
+            .checkSource(
+                loaded.copy(
+                    config =
+                        loaded.config.copy(
+                            source = loaded.config.source.copy(aar = null, maven = "g:a:1", repositories = listOf("ftp://x")),
+                        ),
+                ),
+            ).single()
+            .path shouldBe "source.repositories[0]"
         Doctor
             .checkSource(loaded.copy(config = loaded.config.copy(source = loaded.config.source.copy(maven = "g:a:1"))))
             .single()

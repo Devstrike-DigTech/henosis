@@ -1,6 +1,8 @@
 package com.devstrike.henosis.parser.android
 
 import com.devstrike.henosis.core.api.ApiClassKind
+import com.devstrike.henosis.core.api.ApiDeprecation
+import com.devstrike.henosis.core.api.ApiDeprecationLevel
 import com.devstrike.henosis.core.api.ApiOrigin
 import com.devstrike.henosis.core.types.KotlinTypes
 import com.devstrike.henosis.core.types.TypeRef
@@ -127,5 +129,17 @@ class AndroidSdkParserTest {
         val platformString = TypeRef(KotlinTypes.STRING, nullable = true, platform = true)
         names.returnType shouldBe TypeRef(KotlinTypes.LIST, listOf(platformString), nullable = true, platform = true)
         legacy.functions.single { it.name == "count" }.returnType shouldBe TypeRef(KotlinTypes.INT)
+    }
+}
+
+class DeprecationTest {
+    @Test
+    fun `deprecation levels are read from bytecode`() {
+        val greeter = SampleSdk.model.findClass("com.devstrike.sample.Greeter")!!
+        val old = greeter.functions.single { it.name == "oldGreet" }
+        old.deprecation shouldBe ApiDeprecation(ApiDeprecationLevel.WARNING, "use greet")
+        val legacy = greeter.functions.single { it.name == "legacyGreet" }
+        legacy.deprecation shouldBe ApiDeprecation(ApiDeprecationLevel.ERROR, "moved to greet")
+        greeter.functions.single { it.name == "greet" }.deprecation shouldBe null
     }
 }

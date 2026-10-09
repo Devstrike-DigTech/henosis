@@ -10,6 +10,7 @@ import com.devstrike.henosis.core.config.ConstructorKind
 import com.devstrike.henosis.core.config.FacadeConfig
 import com.devstrike.henosis.core.config.HenosisConfig
 import com.devstrike.henosis.core.config.MethodSelector
+import com.devstrike.henosis.core.inspect.Inspector
 import com.devstrike.henosis.core.ir.Ir
 import com.devstrike.henosis.core.ir.IrConstructor
 import com.devstrike.henosis.core.ir.IrEvent
@@ -81,7 +82,7 @@ internal class IrBuilder(
 
     private fun source(): IrSource {
         val maven = config.source.maven
-        if (maven != null) return IrSource(coordinates = maven)
+        if (maven != null) return IrSource(coordinates = maven, repositories = config.source.repositories)
         val fileName =
             config.source.aar
                 ?.substringAfterLast('/')
@@ -300,6 +301,11 @@ internal class IrBuilder(
         }
         var ok = true
         val member = "${cls.name}.${fn.name}"
+        Inspector.deprecationFinding(fn.deprecation)?.let { finding ->
+            if (!report(path, member, listOf(finding))) {
+                return null
+            }
+        }
         if (fn.typeParameters.isNotEmpty()) {
             error(
                 path,
@@ -514,9 +520,7 @@ internal class IrBuilder(
                     findings += DoctorFinding(DoctorLevel.WARNING, path, "$subject: ${f.message}")
                 }
 
-                SupportLevel.OK -> {
-                    Unit
-                }
+                SupportLevel.OK -> {}
             }
         }
         return ok

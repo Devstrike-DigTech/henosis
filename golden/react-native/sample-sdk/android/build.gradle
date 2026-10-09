@@ -49,8 +49,7 @@ android {
   }
 }
 
-// The native SDK ships inside this package as a one-artifact Maven repository. Consumers resolve it
-// from the same place, so every project of the build must see it.
+// Consumers resolve the SDK from the same repositories, so every project of the build must see them.
 def sdkRepository = uri("${projectDir}/libs/maven")
 rootProject.allprojects {
   repositories {

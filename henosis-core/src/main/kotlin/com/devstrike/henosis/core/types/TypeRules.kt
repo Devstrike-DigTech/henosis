@@ -87,9 +87,7 @@ class TypeRules(
                 return
             }
 
-            TypeRefKind.CLASS -> {
-                Unit
-            }
+            TypeRefKind.CLASS -> {}
         }
         if (type.platform) {
             out += warn("'${type.render()}' comes from Java, so its nullability is unknown; Henosis treats it as nullable")

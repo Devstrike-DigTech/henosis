@@ -18,6 +18,10 @@ com.devstrike.sample.Greeter  class  [unsupported]
   fun greet(name: String): String  [ok]
   fun greetMany(names: List<String>): Map<String, String>  [ok]
   fun greetOptional(name: String?): String  [ok]
+  fun legacyGreet(name: String): String  [unsupported]
+      - deprecated with level ERROR: moved to greet; generated code could not call it
+  fun oldGreet(name: String): String  [warn]
+      - deprecated: use greet
   val ticks: Flow<Int>  [ok]
 
 com.devstrike.sample.LegacyApi  class  [warn]

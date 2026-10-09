@@ -57,6 +57,6 @@ object ConfigLoader {
             yaml.decodeFromString(HenosisConfig.serializer(), text)
         } catch (e: YamlException) {
             val path = e.path.toHumanReadableString().ifEmpty { "<root>" }
-            throw ConfigException(path, e.message ?: e.toString(), e.line, e.column, e)
+            throw ConfigException(path, e.message, e.line, e.column, e)
         }
 }

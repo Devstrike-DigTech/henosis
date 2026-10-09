@@ -25,7 +25,7 @@ allprojects {
     }
 }
 
-// Consumers resolve the SDK from the same repository, so every project of the build must see it
+// Consumers resolve the SDK from the same repositories, so every project of the build must see them
 // (a subproject's own `allprojects` covers only itself).
 rootProject.allprojects {
     repositories {

@@ -13,6 +13,7 @@ kotest = "6.2.5"
 ktlintGradle = "14.2.0"
 ktlint = "1.8.0"
 jsonSchemaValidator = "3.0.8"
+slf4j = "2.0.20"
 
 [libraries]
 # Gradle plugins consumed by buildSrc convention plugins
@@ -29,6 +30,9 @@ asm = { module = "org.ow2.asm:asm", version.ref = "asm" }
 asm-tree = { module = "org.ow2.asm:asm-tree", version.ref = "asm" }
 kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
 maven-resolver-api = { module = "org.apache.maven.resolver:maven-resolver-api", version.ref = "mavenResolver" }
+maven-resolver-util = { module = "org.apache.maven.resolver:maven-resolver-util", version.ref = "mavenResolver" }
+maven-resolver-supplier = { module = "org.apache.maven.resolver:maven-resolver-supplier-mvn3", version.ref = "mavenResolver" }
+slf4j-nop = { module = "org.slf4j:slf4j-nop", version.ref = "slf4j" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }

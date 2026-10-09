@@ -3,6 +3,8 @@ package com.devstrike.henosis.core.inspect
 import com.devstrike.henosis.core.api.ApiClass
 import com.devstrike.henosis.core.api.ApiClassKind
 import com.devstrike.henosis.core.api.ApiConstructor
+import com.devstrike.henosis.core.api.ApiDeprecation
+import com.devstrike.henosis.core.api.ApiDeprecationLevel
 import com.devstrike.henosis.core.api.ApiFunction
 import com.devstrike.henosis.core.api.ApiModel
 import com.devstrike.henosis.core.api.ApiParameter
@@ -89,7 +91,8 @@ object Inspector {
         rules: TypeRules,
     ): InspectedMember {
         val findings =
-            fn.parameters.flatMap { p -> parameterFindings(p, TypePosition.PARAMETER, rules) } +
+            listOfNotNull(deprecationFinding(fn.deprecation)) +
+                fn.parameters.flatMap { p -> parameterFindings(p, TypePosition.PARAMETER, rules) } +
                 rules.check(fn.returnType, TypePosition.RETURN).map { it.at("return type") }
         val signature =
             buildString {
@@ -106,9 +109,28 @@ object Inspector {
         prop: ApiProperty,
         rules: TypeRules,
     ): InspectedMember {
-        val findings = rules.check(prop.type, TypePosition.PROPERTY).map { it.at("type") }
+        val findings =
+            listOfNotNull(deprecationFinding(prop.deprecation)) + rules.check(prop.type, TypePosition.PROPERTY).map { it.at("type") }
         val keyword = if (prop.isMutable) "var" else "val"
         return member(prop.name, "$keyword ${prop.name}: ${prop.type.render()}", findings)
+    }
+
+    /** ERROR/HIDDEN deprecations cannot be compiled against; WARNING ones are flagged so the user knows. */
+    fun deprecationFinding(deprecation: ApiDeprecation?): Finding? {
+        deprecation ?: return null
+        val reason = deprecation.message?.let { ": $it" } ?: ""
+        return when (deprecation.level) {
+            ApiDeprecationLevel.WARNING -> {
+                Finding(SupportLevel.WARN, "deprecated$reason")
+            }
+
+            ApiDeprecationLevel.ERROR, ApiDeprecationLevel.HIDDEN -> {
+                Finding(
+                    SupportLevel.UNSUPPORTED,
+                    "deprecated with level ${deprecation.level.name}$reason; generated code could not call it",
+                )
+            }
+        }
     }
 
     private fun parameterFindings(

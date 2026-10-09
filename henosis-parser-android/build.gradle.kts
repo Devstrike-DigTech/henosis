@@ -7,6 +7,10 @@ dependencies {
     implementation(libs.asm)
     implementation(libs.asm.tree)
     implementation(libs.kotlin.metadata.jvm)
+    implementation(libs.maven.resolver.api)
+    implementation(libs.maven.resolver.util)
+    implementation(libs.maven.resolver.supplier)
+    runtimeOnly(libs.slf4j.nop)
 }
 
 // Parser tests read the sample SDK's AAR, built by the included `fixtures/sample-sdk` build.

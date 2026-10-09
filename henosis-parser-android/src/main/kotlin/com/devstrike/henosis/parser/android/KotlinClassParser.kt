@@ -86,15 +86,16 @@ internal object KotlinClassParser {
                 else -> ApiClassKind.OTHER
             }
         val classTypeParameters = km.typeParameters.toNameMap()
+        val deprecations = Deprecations(node)
         return ApiClass(
             name = km.name.toKotlinName(),
             kind = kind,
             origin = ApiOrigin.KOTLIN,
             typeParameters = km.typeParameters.map { it.name },
             constructors = constructors(km, classTypeParameters),
-            functions = functions(km, kind, classTypeParameters),
-            properties = properties(km, kind, classTypeParameters),
-            enumEntries = km.enumEntries.toList(),
+            functions = functions(km, kind, classTypeParameters, deprecations),
+            properties = properties(km, kind, classTypeParameters, deprecations),
+            enumEntries = km.kmEnumEntries.map { it.name },
         )
     }
 
@@ -115,20 +116,22 @@ internal object KotlinClassParser {
         km: KmClass,
         kind: ApiClassKind,
         classTypeParameters: Map<Int, String>,
+        deprecations: Deprecations,
     ): List<ApiFunction> =
         km.functions
             .filter { it.visibility == Visibility.PUBLIC && !it.isGeneratedMember(kind) }
-            .map { fn -> fn.toApiFunction(classTypeParameters) }
+            .map { fn -> fn.toApiFunction(classTypeParameters, deprecations) }
             .sortedWith(compareBy({ it.name }, { it.jvmDescriptor }))
 
     private fun properties(
         km: KmClass,
         kind: ApiClassKind,
         typeParameters: Map<Int, String>,
+        deprecations: Deprecations,
     ): List<ApiProperty> =
         km.properties
             .filter { it.visibility == Visibility.PUBLIC && !(kind == ApiClassKind.ENUM_CLASS && it.name == "entries") }
-            .map { prop -> prop.toApiProperty(typeParameters) }
+            .map { prop -> prop.toApiProperty(typeParameters, deprecations) }
             .sortedBy { it.name }
 
     private fun KmFunction.isGeneratedMember(kind: ApiClassKind): Boolean =
@@ -136,7 +139,10 @@ internal object KotlinClassParser {
             (kind == ApiClassKind.DATA_CLASS && (name == "copy" || componentName.matches(name))) ||
             (kind == ApiClassKind.ENUM_CLASS && (name == "values" || name == "valueOf"))
 
-    private fun KmFunction.toApiFunction(classTypeParameters: Map<Int, String>): ApiFunction {
+    private fun KmFunction.toApiFunction(
+        classTypeParameters: Map<Int, String>,
+        deprecations: Deprecations,
+    ): ApiFunction {
         val typeParameters = classTypeParameters + this.typeParameters.toNameMap()
         return ApiFunction(
             name = name,
@@ -146,13 +152,18 @@ internal object KotlinClassParser {
             typeParameters = this.typeParameters.map { it.name },
             jvmName = signature?.name ?: name,
             jvmDescriptor = signature?.descriptor ?: "",
+            deprecation = signature?.let { deprecations.of(it.name, it.descriptor) },
         )
     }
 
-    private fun KmProperty.toApiProperty(typeParameters: Map<Int, String>): ApiProperty =
+    private fun KmProperty.toApiProperty(
+        typeParameters: Map<Int, String>,
+        deprecations: Deprecations,
+    ): ApiProperty =
         ApiProperty(
             name = name,
             type = returnType.toTypeRef(typeParameters),
+            deprecation = getterSignature?.let { deprecations.of(it.name, it.descriptor) },
             // A `var` with a non-public setter is read-only from outside the SDK.
             isMutable = isVar && setter?.visibility == Visibility.PUBLIC,
             getterJvmName = getterSignature?.name,
@@ -161,7 +172,7 @@ internal object KotlinClassParser {
     private fun kotlin.metadata.KmValueParameter.toApiParameter(typeParameters: Map<Int, String>): ApiParameter =
         ApiParameter(
             name = name,
-            type = (type ?: varargElementType ?: error("parameter '$name' has no type")).toTypeRef(typeParameters),
+            type = type.toTypeRef(typeParameters),
             hasDefault = declaresDefaultValue,
         )
 
