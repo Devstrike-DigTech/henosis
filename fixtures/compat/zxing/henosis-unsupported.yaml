@@ -1,0 +1,19 @@
+# Compatibility run: the ZXing entry points most people want, kept here so doctor's verdict is reproducible.
+name: zxing_bindings
+version: 0.1.0
+source:
+  maven: com.google.zxing:core:3.5.4
+facades:
+  - class: com.google.zxing.qrcode.QRCodeWriter
+    constructor: none
+    methods:
+      - encode(String!, BarcodeFormat!, Int, Int)
+  - class: com.google.zxing.MultiFormatReader
+    constructor: none
+    methods:
+      - decode(BinaryBitmap!)
+      - reset
+targets:
+  flutter:
+    package: zxing_bindings
+    org: com.devstrike

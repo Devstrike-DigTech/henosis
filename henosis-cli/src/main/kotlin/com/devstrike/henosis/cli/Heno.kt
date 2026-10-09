@@ -18,4 +18,4 @@ class Heno : CliktCommand(name = "heno") {
 }
 
 /** Builds the full `heno` command tree. Used by `main` and by tests. */
-fun heno(): CliktCommand = Heno().subcommands(InitCommand(), InspectCommand(), DoctorCommand(), GenerateCommand())
+fun heno(): CliktCommand = Heno().subcommands(InitCommand(), InspectCommand(), DoctorCommand(), GenerateCommand(), VerifyCommand())

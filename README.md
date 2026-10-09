@@ -35,8 +35,8 @@ Henosis is pre-release. Work happens one milestone at a time; this table is the 
 | M2 | `henosis.yaml` config, IR + JSON schema, `heno init`, `heno doctor`, `generate --emit-ir` | ✅ Done |
 | M3 | Kotlin bridge + Flutter target (plugin + example app) | ✅ Done |
 | M4 | React Native target (TurboModule + example app) | ✅ Done |
-| M5 | `heno verify`, Maven input, exception mapping, 3 public SDKs in `docs/compatibility.md` | ⬜ Next |
-| M6 | Launch readiness: quickstart, docs, contributing guide, release workflow | ⬜ |
+| M5 | `heno verify`, Maven input, exception mapping, 3 public SDKs in `docs/compatibility.md` | ✅ Done |
+| M6 | Launch readiness: quickstart, docs, contributing guide, release workflow | ⬜ Next |
 
 What is deliberately **not** in v0.1 is listed in [docs/roadmap.md](docs/roadmap.md).
 
@@ -93,6 +93,21 @@ cd henosis-out/flutter/sample_sdk/example && flutter pub get && flutter build ap
 cd henosis-out/react-native/sample-sdk && yarn install && yarn typecheck && cd example/android && ./gradlew assembleDebug
 ```
 
+Or let Henosis build both example apps and report pass/fail per target (exit code 2 when a
+toolchain is missing, 3 when a build fails):
+
+```bash
+henosis-cli/build/install/heno/bin/heno verify -c fixtures/henosis.yaml --out henosis-out
+```
+
+An SDK on Maven Central (or any repository) works the same way, with `source.maven` instead of
+`source.aar`; `heno init` accepts coordinates too and three public SDKs are covered in
+[docs/compatibility.md](docs/compatibility.md):
+
+```bash
+henosis-cli/build/install/heno/bin/heno init com.squareup.okio:okio-jvm:3.18.2
+```
+
 To start from your own SDK, let `heno init` write a starter config with every public class
 listed and commented out, then uncomment what you want to expose
 ([config reference](docs/config.md)):
@@ -106,10 +121,10 @@ henosis-cli/build/install/heno/bin/heno init path/to/your-sdk.aar
 | Command | Behaviour | Available |
 | --- | --- | --- |
 | `heno inspect [sdk] [--json]` | Print the public API tree; each member tagged `ok`, `warn`, `unsupported` | M1 |
-| `heno init <aar>` | Parse the SDK and write a starter `henosis.yaml` (Maven coordinates in M5) | M2 |
+| `heno init <aar-or-coords>` | Parse the SDK (local `.aar`/`.jar` or `group:artifact:version`) and write a starter `henosis.yaml` | M2, M5 |
 | `heno doctor [-c henosis.yaml]` | Validate config and types; exit code 1 on any error | M2 |
 | `heno generate [--target flutter,rn] [--out dir] [--emit-ir]` | Run doctor, then write the packages; `--emit-ir` writes `ir.json` | M3, M4 |
-| `heno verify` | Build every generated example app and report pass/fail per target | M5 |
+| `heno verify [--target flutter,rn] [--out dir] [--flutter bin] [--yarn bin]` | Build every generated example app and report pass/fail per target | M5 |
 
 Exit codes: `0` ok, `1` validation error, `2` toolchain missing, `3` build failed.
 
@@ -122,11 +137,12 @@ henosis-parser-android/      AAR/Maven → API model (ASM + Kotlin metadata)
 henosis-gen-bridge/          IR → Kotlin bridge classes shared by every Android target (KotlinPoet)
 henosis-gen-flutter/         IR → Flutter plugin package with example app
 henosis-gen-react-native/    IR → React Native TurboModule package with example app
-henosis-verify/              builds generated example apps (M5)
+henosis-verify/              builds generated example apps
 fixtures/sample-sdk/         our own Android library covering every v0.1 type (a separate, included Gradle build)
 fixtures/henosis.yaml        config for the sample SDK
+fixtures/compat/             configs for the public SDKs in docs/compatibility.md
 golden/                      expected output for snapshot tests
-docs/                        config.md, type-mapping.md, ir.schema.json, roadmap.md
+docs/                        config.md, type-mapping.md, ir.schema.json, compatibility.md, roadmap.md
 ```
 
 ## Developing
@@ -144,7 +160,9 @@ generator is intended, regenerate them and review the diff:
 
 The e2e workflow (`.github/workflows/e2e.yml`) generates both packages from the sample SDK. For
 Flutter it runs `dart analyze --fatal-infos` and builds the example's debug APK with Flutter 3.47.6;
-for React Native it runs `tsc --noEmit` and builds the example's debug APK with React Native 0.87.
+for React Native it runs `tsc --noEmit` and builds the example's debug APK with React Native 0.87,
+both through `heno verify`. The generated Flutter plugin also ships a `test/` that drives the
+bindings through a mocked channel, proving the `HenosisException` mapping; CI runs it with `flutter test`.
 
 Conventions: Kotlin (JVM 17), ktlint, JUnit 5 + Kotest assertions, conventional commit messages
 (`feat(parser): ...`). Output is deterministic: same input, byte-identical output, no timestamps.

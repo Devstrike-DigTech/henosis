@@ -167,9 +167,143 @@ class ConfigCommandsTest {
     }
 
     @Test
-    fun `init rejects maven coordinates for now`() {
-        val result = heno().test(listOf("init", "com.example:sdk:1.0.0", "--out", workDir.resolve("maven.yaml").toString()))
+    fun `init and doctor accept Maven coordinates resolved from a file repository`() {
+        System.setProperty("henosis.offline", "true")
+        val repo = workDir.resolve("maven-repo")
+        val dir = repo.resolve("com/devstrike/sample-sdk/1.2.3")
+        Files.createDirectories(dir)
+        Files.copy(Golden.sampleAar, dir.resolve("sample-sdk-1.2.3.aar"), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+        Files.writeString(
+            dir.resolve("sample-sdk-1.2.3.pom"),
+            "<project><modelVersion>4.0.0</modelVersion><groupId>com.devstrike</groupId><artifactId>sample-sdk</artifactId>" +
+                "<version>1.2.3</version><packaging>aar</packaging></project>",
+        )
+        val out = workDir.resolve("init-maven/henosis.yaml")
+        Files.deleteIfExists(out)
+        val result =
+            heno().test(
+                listOf("init", "com.devstrike:sample-sdk:1.2.3", "--repo", repo.toUri().toString(), "--out", out.toString()),
+            )
+        result.statusCode shouldBe 0
+        val text = Files.readString(out)
+        text shouldContain "maven: com.devstrike:sample-sdk:1.2.3"
+        text shouldContain "repositories: ["
+        ConfigLoader.parse(text).source.maven shouldBe "com.devstrike:sample-sdk:1.2.3"
+
+        val config = workDir.resolve("maven.yaml")
+        Files.writeString(
+            config,
+            Files
+                .readString(
+                    fixtureConfig,
+                ).replace(
+                    "  aar: ./sample-sdk/build/outputs/aar/sample-sdk-release.aar",
+                    "  maven: com.devstrike:sample-sdk:1.2.3\n  repositories: [${repo.toUri()}]",
+                ),
+        )
+        val doctor = heno().test(listOf("doctor", "-c", config.toString()))
+        doctor.statusCode shouldBe 0
+        doctor.stdout shouldContain "doctor: 0 error(s), 2 warning(s)"
+    }
+
+    @Test
+    fun `an empty multiplatform umbrella artifact falls back to its -jvm sibling`() {
+        System.setProperty("henosis.offline", "true")
+        val repo = workDir.resolve("kmp-repo")
+
+        fun artifact(
+            name: String,
+            packaging: String,
+            content: Path?,
+        ) {
+            val dir = repo.resolve("com/devstrike/$name/2.0.0")
+            Files.createDirectories(dir)
+            val file = dir.resolve("$name-2.0.0.$packaging")
+            if (content != null) Files.copy(content, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING) else emptyJar(file)
+            Files.writeString(
+                dir.resolve("$name-2.0.0.pom"),
+                "<project><modelVersion>4.0.0</modelVersion><groupId>com.devstrike</groupId><artifactId>$name</artifactId>" +
+                    "<version>2.0.0</version><packaging>$packaging</packaging></project>",
+            )
+        }
+        artifact("umbrella", "jar", null)
+        artifact("umbrella-jvm", "aar", Golden.sampleAar)
+        val config = workDir.resolve("umbrella.yaml")
+        Files.writeString(
+            config,
+            Files
+                .readString(
+                    fixtureConfig,
+                ).replace(
+                    "  aar: ./sample-sdk/build/outputs/aar/sample-sdk-release.aar",
+                    "  maven: com.devstrike:umbrella:2.0.0\n  repositories: [${repo.toUri()}]",
+                ),
+        )
+        val result = heno().test(listOf("doctor", "-c", config.toString()))
+        result.statusCode shouldBe 0
+        result.stderr shouldContain "parsing its JVM artifact com.devstrike:umbrella-jvm:2.0.0"
+        val out = workDir.resolve("umbrella-out")
+        heno().test(listOf("generate", "-c", config.toString(), "--target", "rn", "--out", out.toString())).statusCode shouldBe 0
+        Files.readString(out.resolve("react-native/sample-sdk/android/build.gradle")) shouldContain
+            "implementation \"com.devstrike:umbrella:2.0.0\""
+    }
+
+    private fun emptyJar(file: Path) {
+        java.util.zip.ZipOutputStream(Files.newOutputStream(file)).use { zip ->
+            zip.putNextEntry(java.util.zip.ZipEntry("META-INF/MANIFEST.MF"))
+            zip.write("Manifest-Version: 1.0\n".toByteArray())
+            zip.closeEntry()
+        }
+    }
+
+    @Test
+    fun `init rejects something that is neither a file nor coordinates`() {
+        val result = heno().test(listOf("init", "not-a-file", "--out", workDir.resolve("bad.yaml").toString()))
         result.statusCode shouldBe 1
-        result.stderr shouldContain "Maven coordinates"
+        result.stderr shouldContain "neither an existing"
+    }
+}
+
+class VerifyCommandTest {
+    private val repoRoot: Path = Path.of(System.getProperty("henosis.repoRoot"))
+    private val fixtureConfig: Path = repoRoot.resolve("fixtures/henosis.yaml")
+    private val workDir: Path = Path.of("build/tmp/verify-command").also { Files.createDirectories(it) }
+
+    @Test
+    fun `verify reports missing packages with exit code 1`() {
+        val result = heno().test(listOf("verify", "-c", fixtureConfig.toString(), "--out", workDir.resolve("empty").toString()))
+        result.statusCode shouldBe 1
+        result.stdout shouldContain "flutter  SKIP (not generated)"
+        result.stdout shouldContain "rn       SKIP (not generated)"
+        result.stdout shouldContain "verify: 0/2 target(s) passed"
+    }
+
+    @Test
+    fun `verify reports a missing toolchain with exit code 2`() {
+        val out = workDir.resolve("generated")
+        heno().test(listOf("generate", "-c", fixtureConfig.toString(), "--out", out.toString())).statusCode shouldBe 0
+        val result =
+            heno().test(
+                listOf(
+                    "verify",
+                    "-c",
+                    fixtureConfig.toString(),
+                    "--out",
+                    out.toString(),
+                    "--flutter",
+                    "/nonexistent/flutter",
+                    "--yarn",
+                    "/nonexistent/yarn",
+                ),
+            )
+        result.statusCode shouldBe 2
+        result.stdout shouldContain "flutter  SKIP (toolchain missing)"
+        result.stdout shouldContain "pass --flutter"
+        result.stdout shouldContain "rn       SKIP (toolchain missing)"
+    }
+
+    @Test
+    fun `verify rejects unknown targets`() {
+        heno().test(listOf("verify", "-c", fixtureConfig.toString(), "--target", "maui")).statusCode shouldBe 1
     }
 }

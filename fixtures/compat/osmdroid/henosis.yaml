@@ -1,0 +1,31 @@
+# Compatibility run: osmdroid (Java, Android AAR from Maven Central). See docs/compatibility.md.
+name: osmdroid_bindings
+version: 0.1.0
+source:
+  maven: org.osmdroid:osmdroid-android:6.1.20
+facades:
+  - class: org.osmdroid.util.BoundingBox
+    constructor: none
+    methods:
+      - set
+      - contains(Double, Double)
+      - getCenterLatitude
+      - getCenterLongitude
+      - getLatNorth
+      - getLatSouth
+      - getLonEast
+      - getLonWest
+      - getLatitudeSpan
+      - getLongitudeSpan
+      - getDiagonalLengthInMeters
+      - setLatNorth
+      - setLatSouth
+      - setLonEast
+      - setLonWest
+targets:
+  flutter:
+    package: osmdroid_bindings
+    org: com.devstrike
+  react_native:
+    package: "@devstrike/osmdroid-bindings"
+    module: OsmdroidBindings

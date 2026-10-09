@@ -1,0 +1,30 @@
+# Compatibility run: ZXing core (Java, JVM jar from Maven Central). See docs/compatibility.md.
+name: zxing_bindings
+version: 0.1.0
+source:
+  maven: com.google.zxing:core:3.5.4
+facades:
+  - class: com.google.zxing.common.BitArray
+    constructor: none
+    methods:
+      - appendBit
+      - appendBits
+      - clear
+      - flip
+      - get
+      - getNextSet
+      - getNextUnset
+      - getSize
+      - getSizeInBytes
+      - isRange
+      - reverse
+      - set
+      - setBulk
+      - setRange
+targets:
+  flutter:
+    package: zxing_bindings
+    org: com.devstrike
+  react_native:
+    package: "@devstrike/zxing-bindings"
+    module: ZxingBindings

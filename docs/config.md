@@ -8,8 +8,8 @@ name: sample_sdk                  # base name; drives package names
 version: 0.1.0
 source:
   aar: ./fixtures/sample-sdk/build/outputs/aar/sample-sdk-release.aar
-  # or: maven: com.example:sdk:1.2.0        (milestone M5)
-  # repositories: [https://example.com/maven]
+  # or: maven: com.squareup.okio:okio-jvm:3.18.2
+  # repositories: [https://example.com/maven]   # extra repositories besides Google and Maven Central
 facades:
   - class: com.devstrike.sample.Greeter
     as: Greeter                   # name exposed to Dart/TS (optional; default: simple class name)
@@ -40,8 +40,8 @@ targets:
 | `name` | yes | Lowercase letters, digits and underscores, starting with a letter. Drives package names. |
 | `version` | yes | Version of the generated packages. `heno doctor` warns if it is not `MAJOR.MINOR.PATCH`. |
 | `source.aar` | one of | Path to a local `.aar`, relative to the config file. |
-| `source.maven` | one of | `group:artifact:version`. Not supported until M5; `doctor` reports it as an error. |
-| `source.repositories` | no | Extra Maven repositories besides Google and Maven Central. |
+| `source.maven` | one of | `group:artifact:version`, resolved from Google, Maven Central and `source.repositories` into `~/.cache/henosis/m2` (override with `HENOSIS_CACHE`; `HENOSIS_OFFLINE` skips the public repositories). `.aar` is tried first, then `.jar`. A Kotlin Multiplatform umbrella artifact with no classes (`okio`) is parsed through its `-jvm`/`-android` sibling while the generated packages keep the coordinates you wrote. |
+| `source.repositories` | no | Extra Maven repositories besides Google and Maven Central. Written into the generated build files too, so consumers resolve the SDK from the same place. |
 | `facades[]` | yes | At least one class to expose. Each facade becomes a singleton in the generated plugin. |
 | `facades[].class` | yes | Fully qualified name of a plain, non-generic public class. |
 | `facades[].as` | no | Exposed name. Must be unique across facades and types. |
@@ -68,7 +68,7 @@ At least one target must be configured.
 
 Errors stop generation; warnings do not.
 
-- **source**: exactly one of `aar`/`maven`; the `.aar` exists.
+- **source**: exactly one of `aar`/`maven`; the `.aar` exists, or the coordinates are well-formed and resolve.
 - **name / targets**: valid identifiers and package names as above.
 - **facades**: class exists, is a plain non-generic class, has the constructor the config asks for; selectors parse, resolve to exactly one method, and exposed names do not collide.
 - **types**: every parameter, return, event-element and data-class field type is in the [v0.1 type table](type-mapping.md). Unsupported types are errors; `Long` and Java platform types are warnings. Data classes must keep a public primary constructor with one parameter per property.

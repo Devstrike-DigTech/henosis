@@ -1,0 +1,27 @@
+# Compatibility run: Okio (Kotlin, JVM jar from Maven Central). See docs/compatibility.md.
+name: okio_bindings
+version: 0.1.0
+source:
+  maven: com.squareup.okio:okio:3.18.2
+facades:
+  - class: okio.Buffer
+    constructor: none
+    methods:
+      - clear
+      - exhausted
+      - isOpen
+      - readByte
+      - readInt
+      - readUtf8()
+      - readUtf8Line
+      - readByteArray()
+      - read(ByteArray)
+      - skip
+      - request
+targets:
+  flutter:
+    package: okio_bindings
+    org: com.devstrike
+  react_native:
+    package: "@devstrike/okio-bindings"
+    module: OkioBindings

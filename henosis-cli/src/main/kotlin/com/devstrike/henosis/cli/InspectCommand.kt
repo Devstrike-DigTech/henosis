@@ -28,9 +28,7 @@ class InspectCommand : CliktCommand(name = "inspect") {
             if (sdk != null) {
                 AndroidSdkParser.parse(sdk!!)
             } else {
-                val loaded = loadConfig(config)
-                val aar = loaded.config.source.aar ?: fail("error    source.aar: not set; pass the SDK path to inspect instead")
-                AndroidSdkParser.parse(loaded.resolve(aar))
+                loadSdk(loadConfig(config))
             }
         val report = Inspector.inspect(model)
         echo(if (json) InspectRenderer.json(report) else InspectRenderer.text(report), trailingNewline = false)

@@ -38,18 +38,16 @@ jobs:
       - name: Generate the Flutter package
         run: henosis-cli/build/install/heno/bin/heno generate -c fixtures/henosis.yaml --target flutter --out henosis-out
 
-      - name: Analyze the generated plugin
+      - name: Analyze and unit-test the generated plugin
         working-directory: henosis-out/flutter/sample_sdk
         run: |
           flutter pub get
           dart analyze --fatal-infos
+          flutter test
+          cd example && flutter pub get && dart analyze --fatal-infos
 
-      - name: Analyze and build the generated example app
-        working-directory: henosis-out/flutter/sample_sdk/example
-        run: |
-          flutter pub get
-          dart analyze --fatal-infos
-          flutter build apk --debug
+      - name: heno verify (flutter build apk --debug)
+        run: henosis-cli/build/install/heno/bin/heno verify -c fixtures/henosis.yaml --target flutter --out henosis-out --verbose
 
   react-native:
     name: Generated React Native package builds
@@ -81,12 +79,5 @@ jobs:
       - name: Generate the React Native package
         run: henosis-cli/build/install/heno/bin/heno generate -c fixtures/henosis.yaml --target rn --out henosis-out
 
-      - name: Install and type-check
-        working-directory: henosis-out/react-native/sample-sdk
-        run: |
-          yarn install
-          yarn typecheck
-
-      - name: Build the generated example app (debug)
-        working-directory: henosis-out/react-native/sample-sdk/example/android
-        run: ./gradlew assembleDebug --no-daemon -PreactNativeArchitectures=arm64-v8a
+      - name: heno verify (yarn install, tsc --noEmit, ./gradlew assembleDebug)
+        run: henosis-cli/build/install/heno/bin/heno verify -c fixtures/henosis.yaml --target rn --out henosis-out --verbose

@@ -16,14 +16,19 @@ Everything here is **out of scope for v0.1** and lives in this file, not in the 
 | Async | Cancellation of in-flight `suspend` calls | v0.2 |
 | Distribution | Publishing to pub.dev / npm | v0.5 |
 | Automation | GitHub Action that regenerates and opens a PR on each native release | v0.4 |
+| Facades | Static facades (`companion object` / Java `static` entry points) | found in Timber, Gson, Glide (docs/compatibility.md) |
+| Facades | Constructor arguments beyond `Context` | found in ZXing `BitMatrix`, osmdroid `GeoPoint` |
+| Input | Read Gradle module metadata (`.module`) to follow Kotlin Multiplatform umbrella artifacts | found in Okio |
+| Verify | Run the generated example apps on an emulator (instrumented end-to-end) | v0.2 |
 
 ## Generator notes (observed while building M3)
 
 - A local `.aar` is shipped inside the generated plugin as a one-artifact Maven repository
   (`android/libs/maven`), because Android library modules cannot depend on a bare `.aar` file.
   Its transitive dependencies are unknown from the archive alone; the generated plugin adds
-  `kotlinx-coroutines-android` (which the bridge needs anyway) and nothing else. SDKs with other
-  runtime dependencies need the Maven input path (M5), which resolves them properly.
+  `kotlinx-coroutines-android` (which the bridge needs anyway) and nothing else. With
+  `source.maven` (M5) the generated build files depend on the coordinates directly and Gradle
+  resolves the SDK's own dependencies from its POM.
 - Generated Dart data classes compare `List` and `Map` fields one level deep (`listEquals` /
   `mapEquals`); nested collections compare by identity.
 - Synchronous SDK methods run on the Android main thread inside the plugin's coroutine scope.
@@ -43,6 +48,19 @@ Everything here is **out of scope for v0.1** and lives in this file, not in the 
   not on TypeScript 7.
 - One TurboModule is registered per facade (`<Module><Facade>`), which keeps Codegen specs typed
   per facade at the cost of one native module per class.
+
+## Hardening notes (observed while building M5)
+
+- Maven resolution uses the POM only. Kotlin Multiplatform "umbrella" artifacts (`okio`) carry
+  their JVM classes in a sibling (`okio-jvm`) selected through Gradle module metadata, which
+  Resolver does not read; `heno` falls back to the `-jvm` and `-android` siblings for parsing and
+  keeps the umbrella coordinates in the generated build files. Reading `.module` metadata for
+  other variant names is a v0.2 option.
+- `heno verify` builds debug variants only and needs the toolchains on the PATH (or `--flutter`
+  / `--yarn`); it does not run the apps. Instrumented end-to-end runs on an emulator are v0.2.
+- Static members (Kotlin `companion object`, Java `static`) and classes without a no-argument or
+  `Context` constructor are reported by `heno inspect`/`doctor` and cannot be facades in v0.1;
+  this is what blocks most of ZXing's and Timber's entry points (see docs/compatibility.md).
 
 ## Parser notes (observed while building M1)
 
