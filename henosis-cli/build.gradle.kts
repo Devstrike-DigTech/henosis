@@ -23,3 +23,6 @@ application {
 val buildSampleSdk = gradle.includedBuild("sample-sdk").task(":assembleRelease")
 tasks.named("test") { dependsOn(buildSampleSdk) }
 tasks.named("updateGolden") { dependsOn(buildSampleSdk) }
+
+// The README's tour runs `heno` against the sample SDK right after installDist, so build it too.
+tasks.named("installDist") { dependsOn(buildSampleSdk) }

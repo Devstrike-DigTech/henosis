@@ -1,0 +1,24 @@
+name: Feature request
+description: A type, lifecycle option, target or command Henosis should support.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you are trying to bind
+      description: The SDK shape or workflow that does not fit today. A snippet of the Kotlin/Java signature helps.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: How `doctor`, the config or the generated API should look.
+    validations:
+      required: true
+  - type: checkboxes
+    id: roadmap
+    attributes:
+      label: Roadmap check
+      options:
+        - label: I checked docs/roadmap.md and this is not already listed there.

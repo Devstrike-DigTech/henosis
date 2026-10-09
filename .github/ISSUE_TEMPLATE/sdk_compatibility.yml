@@ -1,0 +1,42 @@
+name: SDK compatibility report
+description: A public SDK you ran through Henosis, whether it bound or not. These grow docs/compatibility.md.
+labels: [compatibility]
+body:
+  - type: input
+    id: sdk
+    attributes:
+      label: SDK
+      description: Maven coordinates, or a link to the AAR.
+      placeholder: com.squareup.okio:okio:3.18.2
+    validations:
+      required: true
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Outcome
+      options:
+        - Generated and built on both targets
+        - Generated and built on one target
+        - doctor rejected members I need (explain below)
+        - heno could not parse it
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: henosis.yaml
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: heno doctor / verify output
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: What the SDK needs that v0.1 lacks
+      description: Builder-style returns, static entry points, constructor arguments, platform views... see docs/roadmap.md.

@@ -1,0 +1,53 @@
+name: Bug report
+description: Something in heno or in a generated package does not work as documented.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Henosis version
+      description: Output of `heno --version`.
+      placeholder: heno version 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Where it goes wrong
+      options:
+        - heno init / inspect (parsing the SDK)
+        - heno doctor (config validation)
+        - heno generate (writing packages)
+        - heno verify / building the generated Flutter package
+        - heno verify / building the generated React Native package
+        - Runtime behaviour of a generated package
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The commands you ran. If you can share the SDK (public coordinates are ideal) and your `henosis.yaml`, paste them here.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Full output of the failing command (`heno verify --verbose` for build failures).
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, JDK, Flutter / Node versions, Android SDK components.
+      placeholder: macOS 15, Temurin 17.0.19, Flutter 3.47.6, Node 24, platform 36 / build-tools 36.0.0

@@ -1,0 +1,49 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish heno-<version>.zip
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: "platforms;android-36 build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Check the tag matches henosisVersion
+        run: |
+          version=$(grep '^henosisVersion=' gradle.properties | cut -d= -f2)
+          test "v$version" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} does not match henosisVersion=$version"; exit 1; }
+
+      - name: Build, test and package
+        run: ./gradlew build :henosis-cli:distZip
+
+      - name: Smoke-test the distribution
+        run: |
+          unzip -q henosis-cli/build/distributions/heno-*.zip -d dist
+          dist/heno-*/bin/heno --version
+          dist/heno-*/bin/heno inspect fixtures/sample-sdk/build/outputs/aar/sample-sdk-release.aar | tail -1
+
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes=$(awk -v v="${GITHUB_REF_NAME#v}" '$0 ~ "^## \\[" v "\\]" {flag=1; next} /^## \[/ {flag=0} flag' CHANGELOG.md)
+          gh release create "${GITHUB_REF_NAME}" henosis-cli/build/distributions/heno-*.zip \
+            --title "Henosis ${GITHUB_REF_NAME}" \
+            --notes "${notes:-See CHANGELOG.md.}"

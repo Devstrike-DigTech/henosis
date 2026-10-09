@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="300" viewBox="0 0 800 300" role="img" aria-label="Henosis demo placeholder">
+  <rect width="800" height="300" rx="12" fill="#111827"/>
+  <text x="32" y="56" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" fill="#e5e7eb">$ heno init com.squareup.okio:okio:3.18.2</text>
+  <text x="32" y="96" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" fill="#e5e7eb">$ heno doctor</text>
+  <text x="32" y="124" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#9ca3af">doctor: 0 error(s), 2 warning(s)</text>
+  <text x="32" y="164" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" fill="#e5e7eb">$ heno generate &amp;&amp; heno verify</text>
+  <text x="32" y="196" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#34d399">flutter  PASS</text>
+  <text x="32" y="222" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#34d399">rn       PASS</text>
+  <text x="32" y="270" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" fill="#9ca3af">Demo GIF placeholder: record these commands and save as docs/demo.gif</text>
+</svg>

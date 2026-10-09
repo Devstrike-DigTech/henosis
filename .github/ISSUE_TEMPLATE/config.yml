@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/devstrike/henosis/discussions
+    about: Ask how to bind an SDK, or discuss a feature before opening an issue.
