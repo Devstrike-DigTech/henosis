@@ -177,6 +177,35 @@ internal class DartTypes(
             }
         }
 
+    /** The channel (wire) form of [sample], as a mocked native side would reply. */
+    fun sampleWire(type: IrTypeRef): String =
+        when (type.kind) {
+            IrTypeKind.LIST -> {
+                "<Object?>[${sampleWire(type.element!!)}]"
+            }
+
+            IrTypeKind.MAP -> {
+                "<Object?, Object?>{'key': ${sampleWire(type.element!!)}}"
+            }
+
+            IrTypeKind.DATA_CLASS -> {
+                val dataClass = ir.types.first { it.name == type.name }
+                val entries =
+                    dataClass.fields.joinToString(
+                        ", ",
+                    ) { "'${it.name}': ${if (it.type.nullable) "null" else sampleWire(it.type)}" }
+                "<Object?, Object?>{$entries}"
+            }
+
+            IrTypeKind.ENUM -> {
+                "'${ir.types.first { it.name == type.name }.entries.first()}'"
+            }
+
+            else -> {
+                sample(type)
+            }
+        }
+
     /** Whether rendering [type] needs `dart:typed_data`. */
     fun usesTypedData(type: IrTypeRef): Boolean = type.kind == IrTypeKind.BYTE_ARRAY || (type.element?.let { usesTypedData(it) } ?: false)
 

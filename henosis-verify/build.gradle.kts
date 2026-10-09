@@ -3,5 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":henosis-core"))
+    api(project(":henosis-core"))
+    testImplementation(testFixtures(project(":henosis-core")))
 }

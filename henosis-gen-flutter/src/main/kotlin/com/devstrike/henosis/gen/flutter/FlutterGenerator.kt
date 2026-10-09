@@ -37,6 +37,7 @@ object FlutterGenerator {
         files += GeneratedFile("README.md", readme(ir, packageName))
         files += GeneratedFile(".gitignore", gitignore(ir))
         files += DartLibrary(ir, packageName).generate()
+        files += GeneratedFile("test/${packageName}_test.dart", DartTests(ir, packageName).generate())
         files += android.files()
         files += FlutterExample(ir, packageName, androidPackage).files()
         return GeneratedPackage(root = "$TARGET/$packageName", files = files.sortedBy { it.path }, copies = android.copies())

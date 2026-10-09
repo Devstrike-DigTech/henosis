@@ -107,12 +107,15 @@ internal class FlutterAndroid(
                 line("mavenCentral()")
             }
         }
-        if (ir.source.aarFileName != null) {
+        if (ir.source.aarFileName != null || ir.source.repositories.isNotEmpty()) {
             w.line()
-            w.line("// Consumers resolve the SDK from the same repository, so every project of the build must see it")
+            w.line("// Consumers resolve the SDK from the same repositories, so every project of the build must see them")
             w.line("// (a subproject's own `allprojects` covers only itself).")
             w.block("rootProject.allprojects {") {
-                block("repositories {") { line("maven { url = sdkRepository }") }
+                block("repositories {") {
+                    if (ir.source.aarFileName != null) line("maven { url = sdkRepository }")
+                    ir.source.repositories.forEach { line("maven { url = uri(\"$it\") }") }
+                }
             }
         }
         w.line()

@@ -125,13 +125,15 @@ internal class ReactNativeAndroid(
                 line("targetCompatibility JavaVersion.VERSION_17")
             }
         }
-        if (ir.source.aarFileName != null) {
+        if (ir.source.aarFileName != null || ir.source.repositories.isNotEmpty()) {
             w.line()
-            w.line("// The native SDK ships inside this package as a one-artifact Maven repository. Consumers resolve it")
-            w.line("// from the same place, so every project of the build must see it.")
-            w.line("def sdkRepository = uri(\"\${projectDir}/libs/maven\")")
+            w.line("// Consumers resolve the SDK from the same repositories, so every project of the build must see them.")
+            if (ir.source.aarFileName != null) w.line("def sdkRepository = uri(\"\${projectDir}/libs/maven\")")
             w.block("rootProject.allprojects {") {
-                block("repositories {") { line("maven { url sdkRepository }") }
+                block("repositories {") {
+                    if (ir.source.aarFileName != null) line("maven { url sdkRepository }")
+                    ir.source.repositories.forEach { line("maven { url \"$it\" }") }
+                }
             }
         }
         w.line()
